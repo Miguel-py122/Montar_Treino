@@ -46,47 +46,58 @@
 
       <main class="workspace">
         <section class="toolbar card">
-          <div class="toolbar__group toolbar__group--grow">
-            <label class="field-label" for="training-name">Nome do treino</label>
-            <input id="training-name" class="text-input" type="text" maxlength="30" />
+          <div class="toolbar__main">
+            <div class="toolbar__group toolbar__group--grow">
+              <label class="field-label" for="training-name">Nome do treino</label>
+              <input id="training-name" class="text-input" type="text" maxlength="30" />
+              <p class="toolbar__hint">
+                Edite o treino atual, ajuste os exercicios e exporte direto em PDF.
+              </p>
+            </div>
+
+            <div class="toolbar__summary" aria-hidden="true">
+              <div class="toolbar-stat">
+                <span class="field-label">Treino ativo</span>
+                <strong id="toolbar-training-name">Treino A</strong>
+              </div>
+              <div class="toolbar-stat">
+                <span class="field-label">Linhas</span>
+                <strong id="toolbar-exercise-count">0 exercicios</strong>
+              </div>
+            </div>
           </div>
 
-          <div class="toolbar__group">
-            <label class="field-label" for="export-format">Formato</label>
-            <select id="export-format" class="text-input text-input--select">
-              <option value="pdf">PDF</option>
-              <option value="docx">DOCX</option>
-              <option value="json">JSON</option>
-              <option value="csv">CSV</option>
-              <option value="xlsx">XLSX</option>
-            </select>
-          </div>
-
-          <div class="toolbar__actions">
-            <button id="add-training-button" class="button button--secondary" type="button">
-              Novo treino
-            </button>
-            <button id="import-button" class="button button--secondary" type="button">
-              Importar treino
-            </button>
+          <div class="toolbar__actions toolbar__actions--primary">
             <button id="download-button" class="button" type="button">
-              Baixar treino
+              Baixar PDF
             </button>
             <button id="download-all-button" class="button button--secondary" type="button">
               Baixar tudo
             </button>
+            <button id="remove-training-button" class="button button--ghost" type="button">
+              Remover treino
+            </button>
           </div>
         </section>
 
-        <input id="import-file-input" type="file" accept=".json,.csv" hidden />
-
         <section class="status-bar card" aria-live="polite">
           <p id="status-message" class="status-message">
-            Escolha o agrupamento muscular para receber sugestoes. Exportacao disponivel em PDF, DOCX, JSON, CSV e XLSX.
+            Escolha o agrupamento muscular para receber sugestoes e exporte o treino ativo em PDF quando concluir.
           </p>
         </section>
 
         <section class="training-tabs card">
+          <div class="training-tabs__header">
+            <div>
+              <p class="eyebrow eyebrow--muted">Treinos</p>
+              <h3 class="training-tabs__title">Gerencie as fichas do aluno</h3>
+            </div>
+
+            <button id="add-training-button" class="button button--secondary training-tabs__add" type="button">
+              Novo treino
+            </button>
+          </div>
+
           <div id="training-tabs" class="training-tabs__list" aria-label="Lista de treinos"></div>
         </section>
 
@@ -217,58 +228,95 @@
 
           <article class="card body-map-panel">
             <div class="panel-heading">
-              <p class="eyebrow eyebrow--muted">Mapa Corporal</p>
-              <h3>Escolha o foco visualmente</h3>
+              <p class="eyebrow eyebrow--muted">Selecao Guiada</p>
+              <h3>Selecione o grupo muscular</h3>
               <p class="panel-copy">
-                Clique em uma area corporal para preencher rapidamente o agrupamento da proxima linha util.
+                Clique em uma regiao do corpo para definir o foco do treino e preencher a proxima linha disponivel.
               </p>
             </div>
 
             <div class="body-map">
-              <div class="body-map__view-toggle">
-                <button class="map-toggle is-active" data-action="toggle-map-view" data-view="front" type="button">
-                  Frente
-                </button>
-                <button class="map-toggle" data-action="toggle-map-view" data-view="back" type="button">
-                  Costas
-                </button>
-              </div>
-
-              <div class="body-map__stage">
-                <div class="body-map__canvas is-active" data-view-panel="front">
-                  <svg class="body-svg" viewBox="0 0 220 360" aria-hidden="true">
-                    <circle cx="110" cy="38" r="24"></circle>
-                    <path d="M82 70 C90 58, 130 58, 138 70 L146 150 C148 176, 136 192, 110 196 C84 192, 72 176, 74 150 Z"></path>
-                    <path d="M76 84 L48 138 C42 152, 44 170, 54 178 L68 178 L84 118 Z"></path>
-                    <path d="M144 84 L172 138 C178 152, 176 170, 166 178 L152 178 L136 118 Z"></path>
-                    <path d="M88 198 L82 314 C82 332, 96 344, 108 344 L114 344 L110 198 Z"></path>
-                    <path d="M132 198 L138 314 C138 332, 124 344, 112 344 L106 344 L110 198 Z"></path>
-                  </svg>
-
-                  <button class="body-zone body-zone--front-chest" data-action="quick-category" data-category="Peito" type="button">Peito</button>
-                  <button class="body-zone body-zone--front-shoulders" data-action="quick-category" data-category="Ombros" type="button">Ombros</button>
-                  <button class="body-zone body-zone--front-biceps" data-action="quick-category" data-category="Biceps" type="button">Biceps</button>
-                  <button class="body-zone body-zone--front-abs" data-action="quick-category" data-category="Abdomen" type="button">Abdomen</button>
-                  <button class="body-zone body-zone--front-legs" data-action="quick-category" data-category="Pernas" type="button">Pernas</button>
-                  <button class="body-zone body-zone--front-calves" data-action="quick-category" data-category="Panturrilhas" type="button">Panturrilhas</button>
+              <div class="body-map__toolbar">
+                <div class="body-map__view-toggle" role="tablist" aria-label="Vista corporal">
+                  <button class="map-toggle is-active" data-action="toggle-map-view" data-view="front" type="button">
+                    Frente
+                  </button>
+                  <button class="map-toggle" data-action="toggle-map-view" data-view="back" type="button">
+                    Costas
+                  </button>
                 </div>
 
-                <div class="body-map__canvas" data-view-panel="back" hidden>
-                  <svg class="body-svg" viewBox="0 0 220 360" aria-hidden="true">
-                    <circle cx="110" cy="38" r="24"></circle>
-                    <path d="M84 74 C94 62, 126 62, 136 74 L144 154 C146 176, 134 194, 110 202 C86 194, 74 176, 76 154 Z"></path>
-                    <path d="M78 86 L50 142 C44 156, 46 176, 58 186 L72 184 L86 122 Z"></path>
-                    <path d="M142 86 L170 142 C176 156, 174 176, 162 186 L148 184 L134 122 Z"></path>
-                    <path d="M92 204 L86 318 C86 336, 98 346, 108 346 L112 346 L112 204 Z"></path>
-                    <path d="M128 204 L134 318 C134 336, 122 346, 112 346 L108 346 L108 204 Z"></path>
-                  </svg>
+                <div class="body-map__helper">
+                  <span class="field-label">Acao</span>
+                  <strong>Aplicar na proxima linha util</strong>
+                </div>
+              </div>
 
-                  <button class="body-zone body-zone--back-traps" data-action="quick-category" data-category="Ombros" type="button">Ombros</button>
-                  <button class="body-zone body-zone--back-lats" data-action="quick-category" data-category="Costas" type="button">Costas</button>
-                  <button class="body-zone body-zone--back-triceps" data-action="quick-category" data-category="Triceps" type="button">Triceps</button>
-                  <button class="body-zone body-zone--back-glutes" data-action="quick-category" data-category="Gluteos" type="button">Gluteos</button>
-                  <button class="body-zone body-zone--back-hams" data-action="quick-category" data-category="Pernas" type="button">Posteriores</button>
-                  <button class="body-zone body-zone--back-calves" data-action="quick-category" data-category="Panturrilhas" type="button">Panturrilhas</button>
+              <div class="body-map__layout">
+                <div class="body-map__stage">
+                  <div class="body-map__canvas is-active" data-view-panel="front">
+                    <div class="body-figure">
+                      <svg class="body-svg" viewBox="0 0 220 360" aria-hidden="true">
+                        <circle cx="110" cy="38" r="24"></circle>
+                        <path d="M82 70 C90 58, 130 58, 138 70 L146 150 C148 176, 136 192, 110 196 C84 192, 72 176, 74 150 Z"></path>
+                        <path d="M76 84 L48 138 C42 152, 44 170, 54 178 L68 178 L84 118 Z"></path>
+                        <path d="M144 84 L172 138 C178 152, 176 170, 166 178 L152 178 L136 118 Z"></path>
+                        <path d="M88 198 L82 314 C82 332, 96 344, 108 344 L114 344 L110 198 Z"></path>
+                        <path d="M132 198 L138 314 C138 332, 124 344, 112 344 L106 344 L110 198 Z"></path>
+                      </svg>
+
+                      <button class="body-hotspot body-hotspot--front-chest" data-action="quick-category" data-category="Peito" type="button">Peito</button>
+                      <button class="body-hotspot body-hotspot--front-shoulders" data-action="quick-category" data-category="Ombros" type="button">Ombros</button>
+                      <button class="body-hotspot body-hotspot--front-biceps" data-action="quick-category" data-category="Biceps" type="button">Biceps</button>
+                      <button class="body-hotspot body-hotspot--front-abs" data-action="quick-category" data-category="Abdomen" type="button">Abdomen</button>
+                      <button class="body-hotspot body-hotspot--front-legs" data-action="quick-category" data-category="Pernas" type="button">Pernas</button>
+                      <button class="body-hotspot body-hotspot--front-calves" data-action="quick-category" data-category="Panturrilhas" type="button">Panturrilhas</button>
+                    </div>
+                  </div>
+
+                  <div class="body-map__canvas" data-view-panel="back" hidden>
+                    <div class="body-figure">
+                      <svg class="body-svg" viewBox="0 0 220 360" aria-hidden="true">
+                        <circle cx="110" cy="38" r="24"></circle>
+                        <path d="M84 74 C94 62, 126 62, 136 74 L144 154 C146 176, 134 194, 110 202 C86 194, 74 176, 76 154 Z"></path>
+                        <path d="M78 86 L50 142 C44 156, 46 176, 58 186 L72 184 L86 122 Z"></path>
+                        <path d="M142 86 L170 142 C176 156, 174 176, 162 186 L148 184 L134 122 Z"></path>
+                        <path d="M92 204 L86 318 C86 336, 98 346, 108 346 L112 346 L112 204 Z"></path>
+                        <path d="M128 204 L134 318 C134 336, 122 346, 112 346 L108 346 L108 204 Z"></path>
+                      </svg>
+
+                      <button class="body-hotspot body-hotspot--back-traps" data-action="quick-category" data-category="Ombros" type="button">Ombros</button>
+                      <button class="body-hotspot body-hotspot--back-lats" data-action="quick-category" data-category="Costas" type="button">Costas</button>
+                      <button class="body-hotspot body-hotspot--back-triceps" data-action="quick-category" data-category="Triceps" type="button">Triceps</button>
+                      <button class="body-hotspot body-hotspot--back-glutes" data-action="quick-category" data-category="Gluteos" type="button">Gluteos</button>
+                      <button class="body-hotspot body-hotspot--back-hams" data-action="quick-category" data-category="Pernas" type="button">Posteriores</button>
+                      <button class="body-hotspot body-hotspot--back-calves" data-action="quick-category" data-category="Panturrilhas" type="button">Panturrilhas</button>
+                    </div>
+                  </div>
+                </div>
+
+                <aside class="body-map__insights">
+                  <div class="body-map__selection-card">
+                    <span class="field-label">Grupo selecionado</span>
+                    <strong id="body-map-selected-label">Nenhum grupo selecionado</strong>
+                    <p id="body-map-selected-copy" class="body-map__selection-copy">
+                      Use o corpo interativo para escolher rapidamente onde o treino deve focar.
+                    </p>
+                  </div>
+
+                  <div class="body-map__tip-card">
+                    <span class="field-label">Como funciona</span>
+                    <p>
+                      Ao clicar em uma area, o sistema destaca o foco atual e aplica esse agrupamento na proxima linha livre do treino.
+                    </p>
+                  </div>
+
+                  <div class="body-map__legend">
+                    <span class="field-label">Dica</span>
+                    <p>
+                      Se quiser trocar o lado do corpo, use o seletor de Frente e Costas logo acima do boneco.
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -325,7 +373,7 @@
       <tr>
         <td class="sheet-table__index"></td>
         <td>
-          <button class="drag-handle" type="button" aria-label="Arrastar para reordenar" title="Arrastar para reordenar">
+          <button class="drag-handle" data-action="drag-row" draggable="true" type="button" aria-label="Arrastar para reordenar" title="Arrastar para reordenar">
             <span aria-hidden="true">⋮⋮</span>
           </button>
         </td>
@@ -335,9 +383,6 @@
             <button class="table-input category-picker__trigger" data-action="toggle-category" type="button">
               Agrupamento
             </button>
-            <div class="category-picker__panel" data-role="category-panel" hidden>
-              <div class="category-picker__list" data-role="category-list"></div>
-            </div>
           </div>
         </td>
         <td>
@@ -348,15 +393,12 @@
               type="text"
               maxlength="60"
               autocomplete="off"
+              readonly
               placeholder="Pesquise ou selecione"
             />
-            <button class="picker-toggle" data-action="toggle-suggestions" type="button" aria-label="Abrir sugestoes">
+            <button class="picker-toggle" data-action="toggle-suggestions" type="button" aria-label="Abrir seletor de exercicios">
               <span aria-hidden="true">▾</span>
             </button>
-            <div class="exercise-suggestions" data-role="exercise-suggestions" hidden>
-              <p class="exercise-suggestions__meta" data-role="exercise-suggestions-meta"></p>
-              <div class="exercise-suggestions__list" data-role="exercise-suggestions-list"></div>
-            </div>
           </div>
         </td>
         <td>
@@ -383,6 +425,82 @@
         </td>
       </tr>
     </template>
+
+    <div id="exercise-drawer" class="exercise-drawer" hidden aria-hidden="true">
+      <div class="exercise-drawer__backdrop" data-action="close-exercise-drawer"></div>
+      <aside class="exercise-drawer__panel" role="dialog" aria-modal="true" aria-labelledby="exercise-drawer-title">
+        <div class="exercise-drawer__header">
+          <div>
+            <p class="eyebrow eyebrow--muted">Selecionar exercicio</p>
+            <h3 id="exercise-drawer-title" class="exercise-drawer__title">Biblioteca de exercicios</h3>
+            <p id="exercise-drawer-description" class="exercise-drawer__copy">
+              Escolha a categoria e pesquise com conforto antes de aplicar na linha.
+            </p>
+          </div>
+
+          <button class="icon-button icon-button--secondary exercise-drawer__close" data-action="close-exercise-drawer" type="button" aria-label="Fechar seletor">
+            Fechar
+          </button>
+        </div>
+
+        <div class="exercise-drawer__body">
+          <div class="exercise-drawer__summary">
+            <div class="exercise-drawer__badge">
+              <span class="field-label">Treino</span>
+              <strong id="exercise-drawer-training">Treino A</strong>
+            </div>
+            <div class="exercise-drawer__badge">
+              <span class="field-label">Categoria</span>
+              <strong id="exercise-drawer-category">Todos os agrupamentos</strong>
+            </div>
+          </div>
+
+          <label class="exercise-drawer__search">
+            <span class="field-label">Buscar exercicio</span>
+            <input id="exercise-drawer-search" class="text-input" type="text" maxlength="60" placeholder="Ex: supino, remada, cadeira" />
+          </label>
+
+          <div class="exercise-drawer__list-wrap">
+            <p id="exercise-drawer-meta" class="exercise-drawer__meta">Todos os agrupamentos • 0 opcao(oes)</p>
+            <div id="exercise-drawer-list" class="exercise-drawer__list"></div>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <div id="category-drawer" class="category-drawer" hidden aria-hidden="true">
+      <div class="category-drawer__backdrop" data-action="close-category-drawer"></div>
+      <aside class="category-drawer__panel" role="dialog" aria-modal="true" aria-labelledby="category-drawer-title">
+        <div class="category-drawer__header">
+          <div>
+            <p class="eyebrow eyebrow--muted">Selecionar agrupamento</p>
+            <h3 id="category-drawer-title" class="category-drawer__title">Escolha a categoria</h3>
+            <p id="category-drawer-description" class="category-drawer__copy">
+              Defina o agrupamento da linha para liberar os exercicios mais relevantes.
+            </p>
+          </div>
+
+          <button class="icon-button icon-button--secondary category-drawer__close" data-action="close-category-drawer" type="button" aria-label="Fechar seletor de categoria">
+            Fechar
+          </button>
+        </div>
+
+        <div class="category-drawer__body">
+          <div class="category-drawer__summary">
+            <div class="category-drawer__badge">
+              <span class="field-label">Treino</span>
+              <strong id="category-drawer-training">Treino A</strong>
+            </div>
+            <div class="category-drawer__badge">
+              <span class="field-label">Atual</span>
+              <strong id="category-drawer-current">Nao definido</strong>
+            </div>
+          </div>
+
+          <div id="category-drawer-list" class="category-drawer__list"></div>
+        </div>
+      </aside>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>

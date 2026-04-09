@@ -160,12 +160,10 @@ const EXERCISE_CATEGORY_BY_NAME = new Map(
 
 const elements = {
   trainingName: document.querySelector("#training-name"),
-  exportFormat: document.querySelector("#export-format"),
   addTrainingButton: document.querySelector("#add-training-button"),
-  importButton: document.querySelector("#import-button"),
-  importFileInput: document.querySelector("#import-file-input"),
   downloadButton: document.querySelector("#download-button"),
   downloadAllButton: document.querySelector("#download-all-button"),
+  removeTrainingButton: document.querySelector("#remove-training-button"),
   trainingTabs: document.querySelector("#training-tabs"),
   addExerciseButton: document.querySelector("#add-exercise-button"),
   clearTrainingButton: document.querySelector("#clear-training-button"),
@@ -193,6 +191,31 @@ const elements = {
   briefingChipGoal: document.querySelector("#briefing-chip-goal"),
   briefingChipLevel: document.querySelector("#briefing-chip-level"),
   briefingChipFrequency: document.querySelector("#briefing-chip-frequency"),
+  toolbarTrainingName: document.querySelector("#toolbar-training-name"),
+  toolbarExerciseCount: document.querySelector("#toolbar-exercise-count"),
+  bodyMapSelectedLabel: document.querySelector("#body-map-selected-label"),
+  bodyMapSelectedCopy: document.querySelector("#body-map-selected-copy"),
+  exerciseDrawer: document.querySelector("#exercise-drawer"),
+  exerciseDrawerTraining: document.querySelector("#exercise-drawer-training"),
+  exerciseDrawerCategory: document.querySelector("#exercise-drawer-category"),
+  exerciseDrawerDescription: document.querySelector("#exercise-drawer-description"),
+  exerciseDrawerSearch: document.querySelector("#exercise-drawer-search"),
+  exerciseDrawerMeta: document.querySelector("#exercise-drawer-meta"),
+  exerciseDrawerList: document.querySelector("#exercise-drawer-list"),
+  categoryDrawer: document.querySelector("#category-drawer"),
+  categoryDrawerTraining: document.querySelector("#category-drawer-training"),
+  categoryDrawerCurrent: document.querySelector("#category-drawer-current"),
+  categoryDrawerDescription: document.querySelector("#category-drawer-description"),
+  categoryDrawerList: document.querySelector("#category-drawer-list"),
+};
+
+const exerciseDrawerState = {
+  exerciseId: null,
+  query: "",
+};
+
+const categoryDrawerState = {
+  exerciseId: null,
 };
 
 const briefingFieldMap = {
@@ -234,10 +257,10 @@ const defaultState = () => ({
   lastSavedAt: new Date().toISOString(),
   profile: createEmptyProfile(),
   trainings: [
-    { id: "training-a", name: "Treino A", splitLabel: "", focusGroups: [], exercises: [defaultExercise()] },
-    { id: "training-b", name: "Treino B", splitLabel: "", focusGroups: [], exercises: [] },
-    { id: "training-c", name: "Treino C", splitLabel: "", focusGroups: [], exercises: [] },
-    { id: "training-d", name: "Treino D", splitLabel: "", focusGroups: [], exercises: [] },
+    { id: "training-a", name: "Treino A", splitLabel: "", focusGroups: [], bodyMapCategory: "", bodyMapView: "front", exercises: [defaultExercise()] },
+    { id: "training-b", name: "Treino B", splitLabel: "", focusGroups: [], bodyMapCategory: "", bodyMapView: "front", exercises: [] },
+    { id: "training-c", name: "Treino C", splitLabel: "", focusGroups: [], bodyMapCategory: "", bodyMapView: "front", exercises: [] },
+    { id: "training-d", name: "Treino D", splitLabel: "", focusGroups: [], bodyMapCategory: "", bodyMapView: "front", exercises: [] },
   ],
 });
 
@@ -248,14 +271,13 @@ render();
 bindEvents();
 
 function bindEvents() {
-  elements.addTrainingButton.addEventListener("click", handleAddTraining);
-  elements.importButton.addEventListener("click", handleImportButtonClick);
-  elements.importFileInput.addEventListener("change", handleImportFileChange);
-  elements.addExerciseButton.addEventListener("click", handleAddExercise);
-  elements.clearTrainingButton.addEventListener("click", handleClearTraining);
-  elements.downloadButton.addEventListener("click", handleDownload);
-  elements.downloadAllButton.addEventListener("click", handleDownloadAll);
-  elements.trainingName.addEventListener("input", handleTrainingRename);
+  elements.addTrainingButton?.addEventListener("click", handleAddTraining);
+  elements.addExerciseButton?.addEventListener("click", handleAddExercise);
+  elements.clearTrainingButton?.addEventListener("click", handleClearTraining);
+  elements.downloadButton?.addEventListener("click", handleDownload);
+  elements.downloadAllButton?.addEventListener("click", handleDownloadAll);
+  elements.removeTrainingButton?.addEventListener("click", handleRemoveTraining);
+  elements.trainingName?.addEventListener("input", handleTrainingRename);
   Object.keys(briefingFieldMap).forEach((elementKey) => {
     elements[elementKey]?.addEventListener("input", handleBriefingFieldUpdate);
     elements[elementKey]?.addEventListener("change", handleBriefingFieldUpdate);
@@ -270,7 +292,9 @@ function bindEvents() {
   elements.tableBody.addEventListener("drop", handleTableDrop);
   elements.tableBody.addEventListener("dragend", handleTableDragEnd);
   elements.trainingTabs.addEventListener("click", handleTabClick);
+  elements.exerciseDrawerSearch?.addEventListener("input", handleExerciseDrawerSearch);
   document.addEventListener("click", handleDocumentClick);
+  document.addEventListener("keydown", handleDocumentKeyDown);
 }
 
 function loadState() {
@@ -302,6 +326,8 @@ function loadState() {
         name: training.name || `Treino ${trainingIndex + 1}`,
         splitLabel: training.splitLabel || "",
         focusGroups: Array.isArray(training.focusGroups) ? training.focusGroups : [],
+        bodyMapCategory: training.bodyMapCategory || "",
+        bodyMapView: training.bodyMapView === "back" ? "back" : "front",
         exercises: Array.isArray(training.exercises)
           ? training.exercises.map((exercise) => ({
               ...defaultExercise(),
@@ -335,6 +361,7 @@ function getActiveTraining() {
 }
 
 function render() {
+  syncExerciseDrawerState();
   renderTabs();
   renderTrainingHeader();
   renderPlanningBoard();
@@ -346,6 +373,7 @@ function render() {
 function renderPlanningBoard() {
   const activeTraining = getActiveTraining();
   const activeGroups = new Set(activeTraining.focusGroups || []);
+  const selectedCategory = activeTraining.bodyMapCategory || activeTraining.focusGroups[0] || "";
 
   elements.activeSplitLabel.textContent = activeTraining.splitLabel
     ? `${activeTraining.splitLabel} • ${activeTraining.focusGroups.join(", ")}`
@@ -355,21 +383,43 @@ function renderPlanningBoard() {
     button.classList.toggle("is-active", button.dataset.split === activeTraining.splitLabel);
   });
 
-  document.querySelectorAll(".body-zone").forEach((button) => {
-    button.classList.toggle("is-active", activeGroups.has(button.dataset.category || ""));
+  document.querySelectorAll(".body-hotspot").forEach((button) => {
+    const category = button.dataset.category || "";
+    button.classList.toggle("is-active", category === selectedCategory || activeGroups.has(category));
   });
+
+  if (elements.bodyMapSelectedLabel) {
+    elements.bodyMapSelectedLabel.textContent = selectedCategory || "Nenhum grupo selecionado";
+  }
+
+  if (elements.bodyMapSelectedCopy) {
+    elements.bodyMapSelectedCopy.textContent = selectedCategory
+      ? `${selectedCategory} esta destacado no mapa. Clique novamente em outra regiao para trocar rapidamente o foco do treino.`
+      : "Escolha uma regiao do corpo para o sistema aplicar esse agrupamento na proxima linha livre.";
+  }
+
+  setBodyMapView(activeTraining.bodyMapView || "front", false);
 }
 
-function setBodyMapView(view) {
+function setBodyMapView(view, shouldPersist = true) {
+  const activeTraining = getActiveTraining();
+  activeTraining.bodyMapView = view === "back" ? "back" : "front";
+
   document.querySelectorAll('[data-action="toggle-map-view"]').forEach((button) => {
-    button.classList.toggle("is-active", button.dataset.view === view);
+    const isActive = button.dataset.view === activeTraining.bodyMapView;
+    button.classList.toggle("is-active", isActive);
+    button.setAttribute("aria-pressed", String(isActive));
   });
 
   document.querySelectorAll('[data-view-panel]').forEach((panel) => {
-    const isActive = panel.dataset.viewPanel === view;
+    const isActive = panel.dataset.viewPanel === activeTraining.bodyMapView;
     panel.hidden = !isActive;
     panel.classList.toggle("is-active", isActive);
   });
+
+  if (shouldPersist) {
+    persistAndRender(false);
+  }
 }
 
 function renderTabs() {
@@ -390,6 +440,17 @@ function renderTrainingHeader() {
   elements.trainingName.value = activeTraining.name;
   elements.trainingName.classList.toggle("is-invalid", !activeTraining.name.trim());
   elements.activeTrainingLabel.textContent = getDisplayTrainingName(activeTraining.name);
+  if (elements.toolbarTrainingName) {
+    elements.toolbarTrainingName.textContent = getDisplayTrainingName(activeTraining.name);
+  }
+
+  if (elements.removeTrainingButton instanceof HTMLButtonElement) {
+    elements.removeTrainingButton.disabled = state.trainings.length === 1;
+  }
+
+  if (elements.downloadAllButton instanceof HTMLButtonElement) {
+    elements.downloadAllButton.disabled = state.trainings.length <= 1;
+  }
 }
 
 function renderBriefingBoard() {
@@ -434,8 +495,6 @@ function renderTable() {
     });
 
     nameInput.setAttribute("spellcheck", "false");
-    renderSuggestionList(row, exercise, exercise.name);
-    closeSuggestionPanel(row);
     elements.tableBody.appendChild(row);
   });
 
@@ -453,6 +512,10 @@ function renderStats() {
   elements.exerciseCount.textContent = String(totalExercises);
   elements.seriesCount.textContent = String(totalSets);
   elements.lastSavedLabel.textContent = formatTimestamp(state.lastSavedAt);
+
+  if (elements.toolbarExerciseCount) {
+    elements.toolbarExerciseCount.textContent = `${totalExercises} exercicio${totalExercises === 1 ? "" : "s"}`;
+  }
 }
 
 function handleAddTraining() {
@@ -462,6 +525,8 @@ function handleAddTraining() {
     name: nextLabel,
     splitLabel: "",
     focusGroups: [],
+    bodyMapCategory: "",
+    bodyMapView: "front",
     exercises: [],
   };
 
@@ -469,6 +534,42 @@ function handleAddTraining() {
   state.activeTrainingId = nextTraining.id;
   persistAndRender();
   setStatusMessage("Novo treino criado.", "success");
+}
+
+function handleRemoveTraining() {
+  const activeTraining = getActiveTraining();
+
+  if (state.trainings.length === 1) {
+    const confirmedReset = window.confirm(
+      `Este e o ultimo treino. Deseja limpar ${getDisplayTrainingName(activeTraining.name)} e manter a estrutura base?`,
+    );
+
+    if (!confirmedReset) {
+      return;
+    }
+
+    activeTraining.name = "Treino A";
+    activeTraining.splitLabel = "";
+    activeTraining.focusGroups = [];
+    activeTraining.exercises = [];
+    state.profile = createEmptyProfile();
+    persistAndRender();
+    setStatusMessage("Treino base redefinido.", "success");
+    return;
+  }
+
+  const confirmed = window.confirm(`Remover ${getDisplayTrainingName(activeTraining.name)}? Esta acao nao pode ser desfeita.`);
+
+  if (!confirmed) {
+    return;
+  }
+
+  const activeTrainingIndex = state.trainings.findIndex((training) => training.id === activeTraining.id);
+  state.trainings = state.trainings.filter((training) => training.id !== activeTraining.id);
+  const fallbackTraining = state.trainings[Math.max(0, activeTrainingIndex - 1)] || state.trainings[0];
+  state.activeTrainingId = fallbackTraining?.id || defaultState().activeTrainingId;
+  persistAndRender();
+  setStatusMessage("Treino removido.", "success");
 }
 
 function handleAddExercise() {
@@ -497,61 +598,18 @@ function handleClearTraining() {
 }
 
 function handleDownload() {
-  const format = elements.exportFormat.value;
   const exportPayload = createExportPayload(false);
-
-  if (format === "pdf") {
-    handlePdfDownload(exportPayload, false);
-    return;
-  }
-
-  if (format === "docx") {
-    handleDocxDownload(exportPayload, false);
-    return;
-  }
-
-  if (format === "csv") {
-    downloadFile(createCsv(exportPayload), "treino.csv", "text/csv;charset=utf-8;");
-    setStatusMessage("Treino ativo exportado em CSV.", "success");
-    return;
-  }
-
-  if (format === "xlsx") {
-    handleXlsxDownload(exportPayload, false);
-    return;
-  }
-
-  downloadFile(JSON.stringify(exportPayload, null, 2), "treino.json", "application/json;charset=utf-8;");
-  setStatusMessage("Treino ativo exportado em JSON.", "success");
+  handlePdfDownload(exportPayload, false);
 }
 
 function handleDownloadAll() {
-  const format = elements.exportFormat.value;
+  if (state.trainings.length <= 1) {
+    handleDownload();
+    return;
+  }
+
   const exportPayload = createExportPayload(true);
-
-  if (format === "pdf") {
-    handlePdfDownload(exportPayload, true);
-    return;
-  }
-
-  if (format === "docx") {
-    handleDocxDownload(exportPayload, true);
-    return;
-  }
-
-  if (format === "csv") {
-    downloadFile(createCsv(exportPayload), "treinos-completos.csv", "text/csv;charset=utf-8;");
-    setStatusMessage("Todos os treinos exportados em CSV.", "success");
-    return;
-  }
-
-  if (format === "xlsx") {
-    handleXlsxDownload(exportPayload, true);
-    return;
-  }
-
-  downloadFile(JSON.stringify(exportPayload, null, 2), "treinos-completos.json", "application/json;charset=utf-8;");
-  setStatusMessage("Todos os treinos exportados em JSON.", "success");
+  handlePdfDownload(exportPayload, true);
 }
 
 function handlePdfDownload(payload, includeAllTrainings = true) {
@@ -645,7 +703,7 @@ function handleTableFocusIn(event) {
     return;
   }
 
-  openSuggestionPanel(row, exercise, target.value);
+  openExerciseDrawer(row, exercise);
 }
 
 function handleTableFieldUpdate(event) {
@@ -671,14 +729,7 @@ function handleTableFieldUpdate(event) {
   exercise[field] = sanitizeValue(field, target.value);
 
   if (field === "name") {
-    const inferredCategory = inferCategoryFromExerciseName(exercise.name);
-
-    if (inferredCategory && inferredCategory !== exercise.category) {
-      setExerciseCategory(row, exercise, inferredCategory, false);
-    }
-
-    renderSuggestionList(row, exercise, exercise.name);
-    openSuggestionPanel(row, exercise, exercise.name);
+    return;
   }
 
   validateInputField(target, field, exercise[field]);
@@ -687,15 +738,28 @@ function handleTableFieldUpdate(event) {
 }
 
 function handleTableKeyDown(event) {
-  if (event.key !== "Escape") {
+  const row = event.target.closest("tr");
+  if (!row) {
     return;
   }
 
-  const row = event.target.closest("tr");
+  if (event.key === "Escape") {
+    closeExerciseDrawer();
+    closeCategoryDrawer();
+    return;
+  }
 
-  if (row) {
-    closeSuggestionPanel(row);
-    closeCategoryPanel(row);
+  const target = event.target;
+  const exercise = getExerciseById(row.dataset.exerciseId);
+  const isNameField = target instanceof HTMLInputElement && target.dataset.field === "name";
+
+  if (!exercise || !isNameField) {
+    return;
+  }
+
+  if (["Enter", "ArrowDown", " "].includes(event.key)) {
+    event.preventDefault();
+    openExerciseDrawer(row, exercise);
   }
 }
 
@@ -734,32 +798,19 @@ function handleTableClick(event) {
   const toggleCategoryButton = target.closest('[data-action="toggle-category"]');
   if (toggleCategoryButton) {
     const row = toggleCategoryButton.closest("tr");
-
-    if (!row) {
-      return;
-    }
-
-    const panel = row.querySelector('[data-role="category-panel"]');
-    if (panel?.hidden) {
-      openCategoryPanel(row);
-    } else {
-      closeCategoryPanel(row);
-    }
-    return;
-  }
-
-  const categoryOption = target.closest('[data-action="choose-category"]');
-  if (categoryOption) {
-    const row = categoryOption.closest("tr");
     const exercise = getExerciseById(row?.dataset.exerciseId);
 
     if (!row || !exercise) {
       return;
     }
 
-    setExerciseCategory(row, exercise, categoryOption.dataset.category || "", true);
-    persistAndRender(false);
-    renderStats();
+    openCategoryDrawer(row, exercise);
+    return;
+  }
+
+  const categoryOption = target.closest('[data-action="choose-category-drawer"]');
+  if (categoryOption) {
+    selectCategoryFromDrawer(categoryOption);
     return;
   }
 
@@ -772,41 +823,8 @@ function handleTableClick(event) {
       return;
     }
 
-    const panel = row.querySelector('[data-role="exercise-suggestions"]');
-    if (panel?.hidden) {
-      openSuggestionPanel(row, exercise, exercise.name);
-    } else {
-      closeSuggestionPanel(row);
-    }
+    openExerciseDrawer(row, exercise);
     return;
-  }
-
-  const optionButton = target.closest('[data-action="choose-exercise"]');
-  if (optionButton) {
-    const row = optionButton.closest("tr");
-    const exercise = getExerciseById(row?.dataset.exerciseId);
-
-    if (!row || !exercise) {
-      return;
-    }
-
-    exercise.name = optionButton.dataset.exercise || "";
-
-    if (!exercise.category) {
-      setExerciseCategory(row, exercise, inferCategoryFromExerciseName(exercise.name), false);
-    }
-
-    const nameInput = row.querySelector('[data-field="name"]');
-    if (nameInput instanceof HTMLInputElement) {
-      nameInput.value = exercise.name;
-      validateInputField(nameInput, "name", exercise.name);
-      nameInput.focus();
-    }
-
-    renderSuggestionList(row, exercise, exercise.name);
-    closeSuggestionPanel(row);
-    persistAndRender(false);
-    renderStats();
   }
 }
 
@@ -863,6 +881,24 @@ function handleDocumentClick(event) {
   const target = event.target;
 
   if (target instanceof HTMLElement) {
+    const closeCategoryDrawerButton = target.closest('[data-action="close-category-drawer"]');
+    if (closeCategoryDrawerButton) {
+      closeCategoryDrawer();
+      return;
+    }
+
+    const closeDrawerButton = target.closest('[data-action="close-exercise-drawer"]');
+    if (closeDrawerButton) {
+      closeExerciseDrawer();
+      return;
+    }
+
+    const drawerOption = target.closest('[data-action="choose-exercise-drawer"]');
+    if (drawerOption) {
+      selectExerciseFromDrawer(drawerOption);
+      return;
+    }
+
     const splitButton = target.closest('[data-action="apply-split"]');
     if (splitButton) {
       applySplitPreset(splitButton.dataset.split || "", (splitButton.dataset.groups || "").split(",").filter(Boolean));
@@ -882,12 +918,16 @@ function handleDocumentClick(event) {
     }
   }
 
-  if (target instanceof HTMLElement && (target.closest(".exercise-picker") || target.closest(".category-picker"))) {
+  if (target instanceof HTMLElement && (target.closest(".exercise-picker") || target.closest(".category-picker") || target.closest(".exercise-drawer__panel") || target.closest(".category-drawer__panel"))) {
     return;
   }
+}
 
-  closeAllSuggestionPanels();
-  closeAllCategoryPanels();
+function handleDocumentKeyDown(event) {
+  if (event.key === "Escape") {
+    closeExerciseDrawer();
+    closeCategoryDrawer();
+  }
 }
 
 function handleTabClick(event) {
@@ -934,119 +974,38 @@ function validateInputField(input, field, value) {
 function renderCategoryPicker(row, selectedCategory) {
   const hiddenInput = row.querySelector('[data-field="category"]');
   const trigger = row.querySelector('[data-action="toggle-category"]');
-  const list = row.querySelector('[data-role="category-list"]');
 
-  if (!(hiddenInput instanceof HTMLInputElement) || !(trigger instanceof HTMLButtonElement) || !list) {
+  if (!(hiddenInput instanceof HTMLInputElement) || !(trigger instanceof HTMLButtonElement)) {
     return;
   }
 
   hiddenInput.value = selectedCategory || "";
   trigger.textContent = selectedCategory || "Agrupamento";
   trigger.classList.toggle("is-placeholder", !selectedCategory);
-  list.innerHTML = Object.keys(EXERCISE_LIBRARY)
-    .map((category) => {
-      const activeClass = category === selectedCategory ? " is-active" : "";
-      return `<button class="category-option${activeClass}" type="button" data-action="choose-category" data-category="${category}">${category}</button>`;
-    })
-    .join("");
 }
 
 function setExerciseCategory(row, exercise, category, openSuggestions = true) {
+  const previousCategory = exercise.category;
   exercise.category = category || "";
+
+  if (previousCategory !== exercise.category) {
+    const inferredCategory = inferCategoryFromExerciseName(exercise.name);
+
+    if (!exercise.category || inferredCategory !== exercise.category) {
+      exercise.name = "";
+      const nameInput = row.querySelector('[data-field="name"]');
+      if (nameInput instanceof HTMLInputElement) {
+        nameInput.value = "";
+      }
+    }
+  }
+
   renderCategoryPicker(row, exercise.category);
-  renderSuggestionList(row, exercise, exercise.name);
-  closeCategoryPanel(row);
+  closeCategoryDrawer();
 
   if (openSuggestions) {
-    openSuggestionPanel(row, exercise, exercise.name);
+    openExerciseDrawer(row, exercise);
   }
-}
-
-function openCategoryPanel(row) {
-  closeAllCategoryPanels(row);
-  const panel = row.querySelector('[data-role="category-panel"]');
-
-  if (panel) {
-    panel.hidden = false;
-  }
-}
-
-function closeCategoryPanel(row) {
-  const panel = row?.querySelector('[data-role="category-panel"]');
-
-  if (panel) {
-    panel.hidden = true;
-  }
-}
-
-function closeAllCategoryPanels(exceptionRow = null) {
-  elements.tableBody.querySelectorAll('[data-role="category-panel"]').forEach((panel) => {
-    if (exceptionRow && exceptionRow.contains(panel)) {
-      return;
-    }
-
-    panel.hidden = true;
-  });
-}
-
-function renderSuggestionList(row, exercise, query = "") {
-  if (!(row instanceof HTMLTableRowElement)) {
-    return;
-  }
-
-  const meta = row.querySelector('[data-role="exercise-suggestions-meta"]');
-  const list = row.querySelector('[data-role="exercise-suggestions-list"]');
-  const matches = findExerciseMatches(exercise.category, query);
-  const scopeLabel = exercise.category || "Todos os agrupamentos";
-
-  if (meta) {
-    meta.textContent = `${scopeLabel} • ${matches.length} opcao(oes)`;
-  }
-
-  if (!list) {
-    return;
-  }
-
-  if (!matches.length) {
-    list.innerHTML = '<div class="exercise-option exercise-option--empty">Nenhum exercicio encontrado.</div>';
-    return;
-  }
-
-  list.innerHTML = matches
-    .slice(0, 10)
-    .map(
-      (exerciseName) =>
-        `<button class="exercise-option" type="button" data-action="choose-exercise" data-exercise="${escapeAttribute(exerciseName)}">${exerciseName}</button>`,
-    )
-    .join("");
-}
-
-function openSuggestionPanel(row, exercise, query = "") {
-  closeAllSuggestionPanels(row);
-  renderSuggestionList(row, exercise, query);
-  const panel = row.querySelector('[data-role="exercise-suggestions"]');
-
-  if (panel) {
-    panel.hidden = false;
-  }
-}
-
-function closeSuggestionPanel(row) {
-  const panel = row?.querySelector('[data-role="exercise-suggestions"]');
-
-  if (panel) {
-    panel.hidden = true;
-  }
-}
-
-function closeAllSuggestionPanels(exceptionRow = null) {
-  elements.tableBody.querySelectorAll('[data-role="exercise-suggestions"]').forEach((panel) => {
-    if (exceptionRow && exceptionRow.contains(panel)) {
-      return;
-    }
-
-    panel.hidden = true;
-  });
 }
 
 function findExerciseMatches(category, query) {
@@ -1067,6 +1026,237 @@ function findExerciseMatches(category, query) {
   return [...startsWithMatches, ...containsMatches];
 }
 
+function openExerciseDrawer(row, exercise) {
+  if (!(row instanceof HTMLTableRowElement) || !exercise || !elements.exerciseDrawer) {
+    return;
+  }
+
+  exerciseDrawerState.exerciseId = exercise.id;
+  exerciseDrawerState.query = exercise.name || "";
+  elements.exerciseDrawer.hidden = false;
+  elements.exerciseDrawer.setAttribute("aria-hidden", "false");
+  document.body.classList.add("drawer-open");
+  renderExerciseDrawer();
+
+  window.setTimeout(() => {
+    elements.exerciseDrawerSearch?.focus();
+    elements.exerciseDrawerSearch?.select();
+  }, 0);
+}
+
+function openCategoryDrawer(row, exercise) {
+  if (!(row instanceof HTMLTableRowElement) || !exercise || !elements.categoryDrawer) {
+    return;
+  }
+
+  categoryDrawerState.exerciseId = exercise.id;
+  elements.categoryDrawer.hidden = false;
+  elements.categoryDrawer.setAttribute("aria-hidden", "false");
+  document.body.classList.add("drawer-open");
+  renderCategoryDrawer();
+}
+
+function closeExerciseDrawer() {
+  if (!elements.exerciseDrawer || elements.exerciseDrawer.hidden) {
+    return;
+  }
+
+  const currentExerciseId = exerciseDrawerState.exerciseId;
+  elements.exerciseDrawer.hidden = true;
+  elements.exerciseDrawer.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("drawer-open");
+  exerciseDrawerState.exerciseId = null;
+  exerciseDrawerState.query = "";
+
+  const row = currentExerciseId
+    ? elements.tableBody.querySelector(`tr[data-exercise-id="${currentExerciseId}"]`)
+    : null;
+  const nameInput = row?.querySelector('[data-field="name"]');
+
+  if (nameInput instanceof HTMLInputElement) {
+    nameInput.blur();
+  }
+}
+
+function closeCategoryDrawer() {
+  if (!elements.categoryDrawer || elements.categoryDrawer.hidden) {
+    return;
+  }
+
+  elements.categoryDrawer.hidden = true;
+  elements.categoryDrawer.setAttribute("aria-hidden", "true");
+  categoryDrawerState.exerciseId = null;
+
+  if (elements.exerciseDrawer.hidden) {
+    document.body.classList.remove("drawer-open");
+  }
+}
+
+function handleExerciseDrawerSearch(event) {
+  exerciseDrawerState.query = event.target.value;
+  renderExerciseDrawer();
+}
+
+function renderExerciseDrawer() {
+  if (!elements.exerciseDrawer || elements.exerciseDrawer.hidden) {
+    return;
+  }
+
+  const exercise = getExerciseById(exerciseDrawerState.exerciseId);
+  if (!exercise) {
+    closeExerciseDrawer();
+    return;
+  }
+
+  const activeTraining = getActiveTraining();
+  const categoryLabel = exercise.category || "Todos os agrupamentos";
+  const matches = findExerciseMatches(exercise.category, exerciseDrawerState.query);
+  const visibleMatches = matches.slice(0, 40);
+  const normalizedSelectedName = normalizeLookupValue(exercise.name);
+
+  if (elements.exerciseDrawerTraining) {
+    elements.exerciseDrawerTraining.textContent = getDisplayTrainingName(activeTraining.name);
+  }
+
+  if (elements.exerciseDrawerCategory) {
+    elements.exerciseDrawerCategory.textContent = categoryLabel;
+  }
+
+  if (elements.exerciseDrawerDescription) {
+    elements.exerciseDrawerDescription.textContent = exercise.category
+      ? `Exibindo exercicios de ${exercise.category}. Ajuste a categoria da linha para trocar o agrupamento.`
+      : "Sem categoria definida. Escolha qualquer exercicio e a categoria sera ajustada automaticamente.";
+  }
+
+  if (elements.exerciseDrawerSearch && elements.exerciseDrawerSearch.value !== exerciseDrawerState.query) {
+    elements.exerciseDrawerSearch.value = exerciseDrawerState.query;
+  }
+
+  if (elements.exerciseDrawerMeta) {
+    elements.exerciseDrawerMeta.textContent = `${categoryLabel} • ${matches.length} opcao(oes)`;
+  }
+
+  if (!elements.exerciseDrawerList) {
+    return;
+  }
+
+  if (!visibleMatches.length) {
+    elements.exerciseDrawerList.innerHTML = '<div class="exercise-option exercise-option--empty">Nenhum exercicio encontrado.</div>';
+    return;
+  }
+
+  elements.exerciseDrawerList.innerHTML = visibleMatches
+    .map((exerciseName) => {
+      const inferredCategory = inferCategoryFromExerciseName(exerciseName);
+      const isSelected = normalizeLookupValue(exerciseName) === normalizedSelectedName;
+      return `<button class="exercise-option${isSelected ? " is-selected" : ""}" type="button" data-action="choose-exercise-drawer" data-exercise="${escapeAttribute(exerciseName)}" data-category="${escapeAttribute(inferredCategory)}"><span>${exerciseName}</span><small>${inferredCategory || categoryLabel}</small></button>`;
+    })
+    .join("");
+}
+
+function renderCategoryDrawer() {
+  if (!elements.categoryDrawer || elements.categoryDrawer.hidden) {
+    return;
+  }
+
+  const exercise = getExerciseById(categoryDrawerState.exerciseId);
+  if (!exercise) {
+    closeCategoryDrawer();
+    return;
+  }
+
+  const activeTraining = getActiveTraining();
+  const currentCategory = exercise.category || "Nao definido";
+
+  if (elements.categoryDrawerTraining) {
+    elements.categoryDrawerTraining.textContent = getDisplayTrainingName(activeTraining.name);
+  }
+
+  if (elements.categoryDrawerCurrent) {
+    elements.categoryDrawerCurrent.textContent = currentCategory;
+  }
+
+  if (elements.categoryDrawerDescription) {
+    elements.categoryDrawerDescription.textContent = "Escolha o agrupamento e, em seguida, selecione o exercicio no painel lateral.";
+  }
+
+  if (!elements.categoryDrawerList) {
+    return;
+  }
+
+  elements.categoryDrawerList.innerHTML = Object.keys(EXERCISE_LIBRARY)
+    .map((category) => {
+      const isActive = category === exercise.category;
+      const exerciseCount = EXERCISE_LIBRARY[category]?.length || 0;
+      return `<button class="category-option category-option--drawer${isActive ? " is-active" : ""}" type="button" data-action="choose-category-drawer" data-category="${category}"><span>${category}</span><small>${exerciseCount} exercicio${exerciseCount === 1 ? "" : "s"}</small></button>`;
+    })
+    .join("");
+}
+
+function selectExerciseFromDrawer(optionButton) {
+  const exercise = getExerciseById(exerciseDrawerState.exerciseId);
+  const row = exerciseDrawerState.exerciseId
+    ? elements.tableBody.querySelector(`tr[data-exercise-id="${exerciseDrawerState.exerciseId}"]`)
+    : null;
+
+  if (!exercise || !(row instanceof HTMLTableRowElement)) {
+    closeExerciseDrawer();
+    return;
+  }
+
+  exercise.name = optionButton.dataset.exercise || "";
+  const nextCategory = optionButton.dataset.category || inferCategoryFromExerciseName(exercise.name);
+
+  if (nextCategory && nextCategory !== exercise.category) {
+    exercise.category = nextCategory;
+    renderCategoryPicker(row, exercise.category);
+  }
+
+  const nameInput = row.querySelector('[data-field="name"]');
+  if (nameInput instanceof HTMLInputElement) {
+    nameInput.value = exercise.name;
+    validateInputField(nameInput, "name", exercise.name);
+  }
+
+  persistAndRender(false);
+  renderStats();
+  closeExerciseDrawer();
+  setStatusMessage(`Exercicio atualizado para ${exercise.name}.`, "success");
+}
+
+function selectCategoryFromDrawer(optionButton) {
+  const exercise = getExerciseById(categoryDrawerState.exerciseId);
+  const row = categoryDrawerState.exerciseId
+    ? elements.tableBody.querySelector(`tr[data-exercise-id="${categoryDrawerState.exerciseId}"]`)
+    : null;
+
+  if (!exercise || !(row instanceof HTMLTableRowElement)) {
+    closeCategoryDrawer();
+    return;
+  }
+
+  setExerciseCategory(row, exercise, optionButton.dataset.category || "", false);
+  persistAndRender(false);
+  renderStats();
+  closeCategoryDrawer();
+  openExerciseDrawer(row, exercise);
+  setStatusMessage(`Agrupamento atualizado para ${exercise.category}.`, "success");
+}
+
+function syncExerciseDrawerState() {
+  if (!exerciseDrawerState.exerciseId) {
+    return;
+  }
+
+  if (!getExerciseById(exerciseDrawerState.exerciseId)) {
+    closeExerciseDrawer();
+  }
+
+  if (categoryDrawerState.exerciseId && !getExerciseById(categoryDrawerState.exerciseId)) {
+    closeCategoryDrawer();
+  }
+}
+
 function applySplitPreset(splitLabel, groups) {
   const activeTraining = getActiveTraining();
   const preset = SPLIT_PRESET_LIBRARY[splitLabel];
@@ -1075,6 +1265,7 @@ function applySplitPreset(splitLabel, groups) {
 
   activeTraining.splitLabel = splitLabel;
   activeTraining.focusGroups = presetGroups;
+  activeTraining.bodyMapCategory = presetGroups[0] || "";
   persistAndRender();
   setStatusMessage(`Preset ${splitLabel} aplicado com ${insertedCount} exercicio(s) base.`, "success");
 }
@@ -1089,13 +1280,14 @@ function assignCategoryFromBodyMap(category) {
   }
 
   exercise.category = category;
+  activeTraining.bodyMapCategory = category;
 
   if (!activeTraining.focusGroups.includes(category)) {
     activeTraining.focusGroups = [...activeTraining.focusGroups, category];
   }
 
   persistAndRender();
-  setStatusMessage(`${category} aplicado na proxima linha disponivel.`, "success");
+  setStatusMessage(`${category} aplicado na proxima linha disponivel e destacado no mapa corporal.`, "success");
 }
 
 function seedExercisesFromPreset(training, presetExercises) {
@@ -2193,6 +2385,8 @@ function normalizeTraining(training, index) {
     name: String(rawName).slice(0, 30),
     splitLabel: String(training?.splitLabel ?? ""),
     focusGroups: Array.isArray(training?.focusGroups) ? training.focusGroups.filter(Boolean) : [],
+    bodyMapCategory: String(training?.bodyMapCategory ?? ""),
+    bodyMapView: training?.bodyMapView === "back" ? "back" : "front",
     exercises: Array.isArray(rawExercises)
       ? rawExercises.map((exercise) => normalizeExercise(exercise)).filter(Boolean)
       : [],
