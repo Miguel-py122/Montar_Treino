@@ -1,0 +1,36 @@
+[
+  {
+    "treino": "Treino A",
+    "exercicios": [
+      {
+        "category": "Pernas",
+        "name": "Agachamento livre",
+        "sets": "4",
+        "reps": "8",
+        "load": "80",
+        "notes": "Descanso de 2 minutos"
+      },
+      {
+        "category": "Pernas",
+        "name": "Leg press",
+        "sets": "4",
+        "reps": "12",
+        "load": "180",
+        "notes": "Controle na descida"
+      }
+    ]
+  },
+  {
+    "treino": "Treino B",
+    "exercicios": [
+      {
+        "category": "Peito",
+        "name": "Supino reto",
+        "sets": "4",
+        "reps": "10",
+        "load": "60",
+        "notes": "Pausa curta no peito"
+      }
+    ]
+  }
+]

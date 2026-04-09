@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Planner de Treinos</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="hero">
+        <div class="hero__copy">
+          <p class="eyebrow">Planilha de treino personalizada</p>
+          <h1>Monte, ajuste e baixe seus treinos em formato de planilha.</h1>
+          <p class="hero__text">
+            Interface focada em uso diario, com multiplos treinos, edicao direta,
+            salvamento automatico e exportacao local sem backend.
+          </p>
+        </div>
+
+        <div class="hero__panel stats-card">
+          <div>
+            <span class="stats-card__label">Treino ativo</span>
+            <strong id="active-training-label">Treino A</strong>
+          </div>
+          <div>
+            <span class="stats-card__label">Exercicios</span>
+            <strong id="exercise-count">0</strong>
+          </div>
+          <div>
+            <span class="stats-card__label">Total de series</span>
+            <strong id="series-count">0</strong>
+          </div>
+          <div>
+            <span class="stats-card__label">Ultimo salvamento</span>
+            <strong id="last-saved-label">Agora</strong>
+          </div>
+        </div>
+      </header>
+
+      <main class="workspace">
+        <section class="toolbar card">
+          <div class="toolbar__group toolbar__group--grow">
+            <label class="field-label" for="training-name">Nome do treino</label>
+            <input id="training-name" class="text-input" type="text" maxlength="30" />
+          </div>
+
+          <div class="toolbar__group">
+            <label class="field-label" for="export-format">Formato</label>
+            <select id="export-format" class="text-input text-input--select">
+              <option value="pdf">PDF</option>
+              <option value="docx">DOCX</option>
+              <option value="json">JSON</option>
+              <option value="csv">CSV</option>
+              <option value="xlsx">XLSX</option>
+            </select>
+          </div>
+
+          <div class="toolbar__actions">
+            <button id="add-training-button" class="button button--secondary" type="button">
+              Novo treino
+            </button>
+            <button id="import-button" class="button button--secondary" type="button">
+              Importar treino
+            </button>
+            <button id="download-button" class="button" type="button">
+              Baixar treino
+            </button>
+            <button id="download-all-button" class="button button--secondary" type="button">
+              Baixar tudo
+            </button>
+          </div>
+        </section>
+
+        <input id="import-file-input" type="file" accept=".json,.csv" hidden />
+
+        <section class="status-bar card" aria-live="polite">
+          <p id="status-message" class="status-message">
+            Escolha o agrupamento muscular para receber sugestoes. Exportacao disponivel em PDF, DOCX, JSON, CSV e XLSX.
+          </p>
+        </section>
+
+        <section class="training-tabs card">
+          <div id="training-tabs" class="training-tabs__list" aria-label="Lista de treinos"></div>
+        </section>
+
+        <section id="briefing-board" class="briefing-board card" data-print-title="Planner de Treinos" data-print-subtitle="">
+          <div class="briefing-board__header">
+            <div class="panel-heading">
+              <p class="eyebrow eyebrow--muted">Ficha Profissional</p>
+              <h3>Contexto do aluno e da sessao</h3>
+              <p class="panel-copy">
+                Essas informacoes acompanham todos os treinos do aluno ao trocar entre A, B, C e D.
+              </p>
+            </div>
+          </div>
+
+          <div class="briefing-highlights" aria-hidden="true">
+            <div class="briefing-chip">
+              <span class="field-label">Sessao</span>
+              <strong id="briefing-chip-date">Nao definida</strong>
+            </div>
+            <div class="briefing-chip">
+              <span class="field-label">Objetivo central</span>
+              <strong id="briefing-chip-goal">Livre</strong>
+            </div>
+            <div class="briefing-chip">
+              <span class="field-label">Nivel atual</span>
+              <strong id="briefing-chip-level">Nao informado</strong>
+            </div>
+            <div class="briefing-chip">
+              <span class="field-label">Frequencia</span>
+              <strong id="briefing-chip-frequency">0x semana</strong>
+            </div>
+          </div>
+
+          <div class="briefing-grid">
+            <label class="briefing-field briefing-grid__field">
+              <span class="field-label">Aluno</span>
+              <input id="trainee-name" class="text-input" type="text" maxlength="60" placeholder="Nome do aluno" />
+            </label>
+            <label class="briefing-field briefing-grid__field">
+              <span class="field-label">Objetivo</span>
+              <select id="training-goal" class="text-input text-input--select">
+                <option value="">Selecione</option>
+                <option value="Hipertrofia">Hipertrofia</option>
+                <option value="Emagrecimento">Emagrecimento</option>
+                <option value="Resistencia">Resistencia</option>
+                <option value="Forca">Forca</option>
+                <option value="Reabilitacao">Reabilitacao</option>
+              </select>
+            </label>
+            <label class="briefing-field briefing-grid__field">
+              <span class="field-label">Nivel</span>
+              <select id="training-level" class="text-input text-input--select">
+                <option value="">Selecione</option>
+                <option value="Iniciante">Iniciante</option>
+                <option value="Intermediario">Intermediario</option>
+                <option value="Avancado">Avancado</option>
+              </select>
+            </label>
+            <label class="briefing-field briefing-grid__field">
+              <span class="field-label">Data</span>
+              <input id="training-date" class="text-input" type="date" />
+            </label>
+            <label class="briefing-field briefing-grid__field">
+              <span class="field-label">Duracao</span>
+              <input id="session-duration" class="text-input" type="text" maxlength="20" placeholder="Ex: 60 min" />
+            </label>
+            <label class="briefing-field briefing-grid__field">
+              <span class="field-label">Descanso padrao</span>
+              <input id="rest-time" class="text-input" type="text" maxlength="30" placeholder="Ex: 60 a 90 s" />
+            </label>
+            <label class="briefing-field briefing-grid__field">
+              <span class="field-label">Professor</span>
+              <input id="coach-name" class="text-input" type="text" maxlength="60" placeholder="Nome do profissional" />
+            </label>
+            <label class="briefing-field briefing-grid__field">
+              <span class="field-label">Frequencia semanal</span>
+              <input id="weekly-frequency" class="text-input" type="number" min="1" max="14" placeholder="4" />
+            </label>
+            <label class="briefing-field briefing-grid__field briefing-grid__field--wide">
+              <span class="field-label">Observacoes gerais</span>
+              <textarea id="briefing-notes" class="text-input briefing-note" rows="3" maxlength="240" placeholder="Restricoes, dor, foco tecnico, observacoes do atendimento"></textarea>
+            </label>
+          </div>
+
+        </section>
+
+        <section class="planning-board">
+          <article class="card split-card-panel">
+            <div class="panel-heading">
+              <p class="eyebrow eyebrow--muted">Divisao Do Dia</p>
+              <h3>Atalhos de montagem</h3>
+              <p class="panel-copy">
+                Use um preset para organizar a sessao e definir os grupos em destaque do treino atual.
+              </p>
+            </div>
+
+            <div id="split-presets" class="split-grid">
+              <button class="split-preset" data-action="apply-split" data-split="Push" data-groups="Peito,Ombros,Triceps" type="button">
+                <strong>Push</strong>
+                <span>Peito, ombros e triceps</span>
+              </button>
+              <button class="split-preset" data-action="apply-split" data-split="Pull" data-groups="Costas,Biceps" type="button">
+                <strong>Pull</strong>
+                <span>Costas e biceps</span>
+              </button>
+              <button class="split-preset" data-action="apply-split" data-split="Legs" data-groups="Pernas,Gluteos,Panturrilhas" type="button">
+                <strong>Legs</strong>
+                <span>Pernas, gluteos e panturrilhas</span>
+              </button>
+              <button class="split-preset" data-action="apply-split" data-split="Upper" data-groups="Peito,Costas,Ombros,Biceps,Triceps" type="button">
+                <strong>Upper</strong>
+                <span>Parte superior completa</span>
+              </button>
+              <button class="split-preset" data-action="apply-split" data-split="Lower" data-groups="Pernas,Gluteos,Panturrilhas,Abdomen" type="button">
+                <strong>Lower</strong>
+                <span>Base, gluteos e core</span>
+              </button>
+              <button class="split-preset" data-action="apply-split" data-split="Core" data-groups="Abdomen,Ombros" type="button">
+                <strong>Core</strong>
+                <span>Abdomen, postura e estabilizacao</span>
+              </button>
+            </div>
+
+            <p class="panel-caption">
+              <span id="active-split-label">Sem preset aplicado.</span>
+            </p>
+          </article>
+
+          <article class="card body-map-panel">
+            <div class="panel-heading">
+              <p class="eyebrow eyebrow--muted">Mapa Corporal</p>
+              <h3>Escolha o foco visualmente</h3>
+              <p class="panel-copy">
+                Clique em uma area corporal para preencher rapidamente o agrupamento da proxima linha util.
+              </p>
+            </div>
+
+            <div class="body-map">
+              <div class="body-map__view-toggle">
+                <button class="map-toggle is-active" data-action="toggle-map-view" data-view="front" type="button">
+                  Frente
+                </button>
+                <button class="map-toggle" data-action="toggle-map-view" data-view="back" type="button">
+                  Costas
+                </button>
+              </div>
+
+              <div class="body-map__stage">
+                <div class="body-map__canvas is-active" data-view-panel="front">
+                  <svg class="body-svg" viewBox="0 0 220 360" aria-hidden="true">
+                    <circle cx="110" cy="38" r="24"></circle>
+                    <path d="M82 70 C90 58, 130 58, 138 70 L146 150 C148 176, 136 192, 110 196 C84 192, 72 176, 74 150 Z"></path>
+                    <path d="M76 84 L48 138 C42 152, 44 170, 54 178 L68 178 L84 118 Z"></path>
+                    <path d="M144 84 L172 138 C178 152, 176 170, 166 178 L152 178 L136 118 Z"></path>
+                    <path d="M88 198 L82 314 C82 332, 96 344, 108 344 L114 344 L110 198 Z"></path>
+                    <path d="M132 198 L138 314 C138 332, 124 344, 112 344 L106 344 L110 198 Z"></path>
+                  </svg>
+
+                  <button class="body-zone body-zone--front-chest" data-action="quick-category" data-category="Peito" type="button">Peito</button>
+                  <button class="body-zone body-zone--front-shoulders" data-action="quick-category" data-category="Ombros" type="button">Ombros</button>
+                  <button class="body-zone body-zone--front-biceps" data-action="quick-category" data-category="Biceps" type="button">Biceps</button>
+                  <button class="body-zone body-zone--front-abs" data-action="quick-category" data-category="Abdomen" type="button">Abdomen</button>
+                  <button class="body-zone body-zone--front-legs" data-action="quick-category" data-category="Pernas" type="button">Pernas</button>
+                  <button class="body-zone body-zone--front-calves" data-action="quick-category" data-category="Panturrilhas" type="button">Panturrilhas</button>
+                </div>
+
+                <div class="body-map__canvas" data-view-panel="back" hidden>
+                  <svg class="body-svg" viewBox="0 0 220 360" aria-hidden="true">
+                    <circle cx="110" cy="38" r="24"></circle>
+                    <path d="M84 74 C94 62, 126 62, 136 74 L144 154 C146 176, 134 194, 110 202 C86 194, 74 176, 76 154 Z"></path>
+                    <path d="M78 86 L50 142 C44 156, 46 176, 58 186 L72 184 L86 122 Z"></path>
+                    <path d="M142 86 L170 142 C176 156, 174 176, 162 186 L148 184 L134 122 Z"></path>
+                    <path d="M92 204 L86 318 C86 336, 98 346, 108 346 L112 346 L112 204 Z"></path>
+                    <path d="M128 204 L134 318 C134 336, 122 346, 112 346 L108 346 L108 204 Z"></path>
+                  </svg>
+
+                  <button class="body-zone body-zone--back-traps" data-action="quick-category" data-category="Ombros" type="button">Ombros</button>
+                  <button class="body-zone body-zone--back-lats" data-action="quick-category" data-category="Costas" type="button">Costas</button>
+                  <button class="body-zone body-zone--back-triceps" data-action="quick-category" data-category="Triceps" type="button">Triceps</button>
+                  <button class="body-zone body-zone--back-glutes" data-action="quick-category" data-category="Gluteos" type="button">Gluteos</button>
+                  <button class="body-zone body-zone--back-hams" data-action="quick-category" data-category="Pernas" type="button">Posteriores</button>
+                  <button class="body-zone body-zone--back-calves" data-action="quick-category" data-category="Panturrilhas" type="button">Panturrilhas</button>
+                </div>
+              </div>
+            </div>
+          </article>
+        </section>
+
+        <section class="sheet card">
+          <div class="sheet__header">
+            <div>
+              <p class="eyebrow eyebrow--muted">Editor estilo planilha</p>
+              <h2>Montagem do treino</h2>
+              <p class="sheet__hint">
+                Escolha o agrupamento muscular e pesquise o exercicio direto na linha.
+              </p>
+            </div>
+
+            <div class="sheet__actions">
+              <button id="add-exercise-button" class="button" type="button">
+                Adicionar exercicio
+              </button>
+              <button id="clear-training-button" class="button button--ghost" type="button">
+                Limpar treino
+              </button>
+            </div>
+          </div>
+
+          <div class="sheet__table-wrapper">
+            <table class="sheet-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Ordem</th>
+                  <th>Categoria</th>
+                  <th>Exercicio</th>
+                  <th>Series</th>
+                  <th>Repeticoes</th>
+                  <th>Carga (kg)</th>
+                  <th>Observacoes</th>
+                  <th>Acoes</th>
+                </tr>
+              </thead>
+              <tbody id="exercise-table-body"></tbody>
+            </table>
+          </div>
+
+          <p id="empty-state" class="empty-state" hidden>
+            Nenhum exercicio cadastrado. Clique em "Adicionar exercicio" para iniciar o treino.
+          </p>
+        </section>
+      </main>
+    </div>
+
+    <template id="exercise-row-template">
+      <tr>
+        <td class="sheet-table__index"></td>
+        <td>
+          <button class="drag-handle" type="button" aria-label="Arrastar para reordenar" title="Arrastar para reordenar">
+            <span aria-hidden="true">⋮⋮</span>
+          </button>
+        </td>
+        <td>
+          <div class="category-picker">
+            <input data-field="category" type="hidden" />
+            <button class="table-input category-picker__trigger" data-action="toggle-category" type="button">
+              Agrupamento
+            </button>
+            <div class="category-picker__panel" data-role="category-panel" hidden>
+              <div class="category-picker__list" data-role="category-list"></div>
+            </div>
+          </div>
+        </td>
+        <td>
+          <div class="exercise-picker">
+            <input
+              data-field="name"
+              class="table-input table-input--name"
+              type="text"
+              maxlength="60"
+              autocomplete="off"
+              placeholder="Pesquise ou selecione"
+            />
+            <button class="picker-toggle" data-action="toggle-suggestions" type="button" aria-label="Abrir sugestoes">
+              <span aria-hidden="true">▾</span>
+            </button>
+            <div class="exercise-suggestions" data-role="exercise-suggestions" hidden>
+              <p class="exercise-suggestions__meta" data-role="exercise-suggestions-meta"></p>
+              <div class="exercise-suggestions__list" data-role="exercise-suggestions-list"></div>
+            </div>
+          </div>
+        </td>
+        <td>
+          <input data-field="sets" class="table-input table-input--number" type="number" min="1" max="30" placeholder="4" />
+        </td>
+        <td>
+          <input data-field="reps" class="table-input table-input--number" type="number" min="1" max="200" placeholder="10" />
+        </td>
+        <td>
+          <input data-field="load" class="table-input table-input--number" type="number" min="0" max="500" step="0.5" placeholder="40" />
+        </td>
+        <td>
+          <input data-field="notes" class="table-input" type="text" maxlength="120" placeholder="Cadencia, pausa, tecnica" />
+        </td>
+        <td>
+          <div class="row-actions">
+            <button class="icon-button icon-button--secondary" data-action="duplicate" type="button" aria-label="Duplicar exercicio">
+              Duplicar
+            </button>
+            <button class="icon-button" data-action="remove" type="button" aria-label="Remover exercicio">
+              Remover
+            </button>
+          </div>
+        </td>
+      </tr>
+    </template>
+
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://unpkg.com/docx@8.5.0/build/index.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>
