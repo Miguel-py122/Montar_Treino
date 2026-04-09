@@ -2,160 +2,275 @@ const STORAGE_KEY = "planner-treinos:v3";
 const LEGACY_STORAGE_KEYS = [STORAGE_KEY, "planner-treinos:v2", "planner-treinos:v1"];
 const DOCX_MIME_TYPE = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 
+const createExerciseCatalog = (entries) => Object.freeze(entries.map(([
+  name,
+  level,
+  type,
+  equipment,
+  secondary,
+  description,
+  postureTips,
+  variations,
+  goals,
+  aliases = [],
+]) => ({
+  name,
+  level,
+  type,
+  equipment,
+  secondary,
+  description,
+  postureTips,
+  variations,
+  goals,
+  aliases,
+})));
+
 const EXERCISE_LIBRARY = Object.freeze({
-  Peito: [
-    "Supino reto",
-    "Supino inclinado",
-    "Supino declinado",
-    "Crucifixo reto",
-    "Crucifixo inclinado",
-    "Cross over",
-    "Peck deck",
-    "Flexao de bracos",
-  ],
-  Costas: [
-    "Puxada frontal",
-    "Puxada supinada",
-    "Remada curvada",
-    "Remada baixa",
-    "Remada serrote",
-    "Remada cavalinho",
-    "Pulldown",
-    "Barra fixa",
-    "Levantamento terra",
-    "Pull over",
-  ],
-  Pernas: [
-    "Agachamento livre",
-    "Agachamento hack",
-    "Leg press",
-    "Cadeira extensora",
-    "Mesa flexora",
-    "Stiff",
-    "Afundo",
-    "Passada",
-    "Agachamento bulgaro",
-    "Terra romeno",
-  ],
-  Gluteos: [
-    "Elevacao pelvica",
-    "Ponte glutea",
-    "Coice no cabo",
-    "Abducao de quadril",
-    "Agachamento sumo",
-    "Step-up",
-  ],
-  Ombros: [
-    "Desenvolvimento com halteres",
-    "Desenvolvimento militar",
-    "Arnold press",
-    "Elevacao lateral",
-    "Elevacao frontal",
-    "Crucifixo inverso",
-    "Face pull",
-    "Remada alta",
-  ],
-  Biceps: [
-    "Rosca direta",
-    "Rosca alternada",
-    "Rosca martelo",
-    "Rosca Scott",
-    "Rosca concentrada",
-    "Rosca inversa",
-  ],
-  Triceps: [
-    "Triceps testa",
-    "Triceps corda",
-    "Triceps frances",
-    "Supino fechado",
-    "Mergulho",
-    "Triceps banco",
-  ],
-  Abdomen: [
-    "Prancha",
-    "Crunch",
-    "Abdominal infra",
-    "Abdominal na polia",
-    "Elevacao de pernas",
-    "Ab wheel",
-  ],
-  Panturrilhas: [
-    "Panturrilha em pe",
-    "Panturrilha sentado",
-    "Panturrilha no leg press",
-    "Panturrilha unilateral",
-    "Donkey calf raise",
-  ],
+  Peito: createExerciseCatalog([
+    ["Supino reto com barra", "Intermediario", "Composto", "Barra e banco", ["Triceps", "Deltoide anterior"], "Pressao horizontal classica para ganho global de peitoral.", "Mantenha escapas retraidas e os pes firmes no solo.", ["Supino reto com halteres", "Chest press na maquina"], ["Hipertrofia", "Forca"], ["Supino reto"]],
+    ["Supino inclinado com barra", "Intermediario", "Composto", "Barra e banco inclinado", ["Deltoide anterior", "Triceps"], "Enfatiza a porcao clavicular do peitoral.", "Evite perder a curva neutra da lombar no banco inclinado.", ["Supino inclinado com halteres", "Smith inclinado"], ["Hipertrofia", "Forca"], ["Supino inclinado"]],
+    ["Supino declinado com barra", "Intermediario", "Composto", "Barra e banco declinado", ["Triceps", "Deltoide anterior"], "Trabalha peito com maior enfase em fibras inferiores.", "Desca controlado e barra alinhada ao esterno inferior.", ["Supino declinado com halteres"], ["Hipertrofia"], ["Supino declinado"]],
+    ["Supino reto com halteres", "Iniciante", "Composto", "Halteres e banco", ["Triceps", "Deltoide anterior"], "Permite maior amplitude e simetria entre os lados.", "Controle a descida e nao bata os halteres no topo.", ["Supino neutro com halteres", "Squeeze press"], ["Hipertrofia", "Resistencia"]],
+    ["Supino inclinado com halteres", "Iniciante", "Composto", "Halteres e banco inclinado", ["Deltoide anterior", "Triceps"], "Variante livre para peitoral superior.", "Mantenha os punhos neutros e cotovelos ligeiramente abaixo dos ombros.", ["Supino inclinado alternado"], ["Hipertrofia", "Resistencia"]],
+    ["Crucifixo reto com halteres", "Iniciante", "Isolado", "Halteres e banco", ["Deltoide anterior"], "Alongamento controlado para peitoral em plano reto.", "Pense em abracar um barril e evite estender demais os cotovelos.", ["Crucifixo no cabo", "Peck deck"], ["Hipertrofia"], ["Crucifixo reto"]],
+    ["Crucifixo inclinado com halteres", "Intermediario", "Isolado", "Halteres e banco inclinado", ["Deltoide anterior"], "Trabalha aducao horizontal com foco em peitoral superior.", "Desca lenta e cotovelos sem travar na subida.", ["Crossover na polia baixa"], ["Hipertrofia"], ["Crucifixo inclinado"]],
+    ["Crossover na polia alta", "Iniciante", "Isolado", "Polia", ["Deltoide anterior"], "Mantem tensao continua no peitoral durante todo o arco.", "Fixe o tronco e conduza as maos ate a linha media do corpo.", ["Crossover na polia media", "Crossover unilateral"], ["Hipertrofia", "Emagrecimento"], ["Cross over"]],
+    ["Crossover na polia baixa", "Intermediario", "Isolado", "Polia", ["Deltoide anterior"], "Enfase maior no feixe superior do peitoral.", "Movimento ascendente controlado sem compensar com lombar.", ["Crucifixo inclinado com halteres"], ["Hipertrofia"]],
+    ["Peck deck", "Iniciante", "Isolado", "Maquina", ["Deltoide anterior"], "Opcao estavel para isolamento do peitoral.", "Ajuste o banco para alinhar maos ao centro do peito.", ["Crucifixo na maquina convergente"], ["Hipertrofia", "Iniciante"], ["Peck deck", "Voador"]],
+    ["Chest press na maquina", "Iniciante", "Composto", "Maquina", ["Triceps", "Deltoide anterior"], "Empurrada guiada para construir tecnica e volume.", "Mantenha escapulas apoiadas e nao trave os cotovelos.", ["Chest press convergente", "Supino no smith"], ["Hipertrofia", "Iniciante"]],
+    ["Flexao de bracos tradicional", "Iniciante", "Composto", "Peso corporal", ["Triceps", "Core"], "Movimento basico de empurrar com controle corporal.", "Corpo alinhado da cabeca ao calcanhar durante toda a repeticao.", ["Flexao inclinada", "Flexao com apoio nos joelhos"], ["Resistencia", "Emagrecimento"], ["Flexao de bracos"]],
+    ["Flexao inclinada", "Iniciante", "Composto", "Peso corporal e apoio", ["Triceps", "Core"], "Versao regressiva para dominar o padrao de empurrar.", "Use um apoio firme e mantenha o tronco rigido.", ["Flexao na parede", "Flexao no banco"], ["Iniciante", "Resistencia"]],
+    ["Paralelas com foco em peito", "Avancado", "Composto", "Barras paralelas", ["Triceps", "Deltoide anterior"], "Exercicio intenso com grande alongamento do peitoral.", "Incline levemente o tronco e desca com controle.", ["Paralelas assistidas"], ["Hipertrofia", "Forca"]],
+    ["Squeeze press com halteres", "Intermediario", "Isolado", "Halteres e banco", ["Triceps"], "Mantem aducao constante apertando os halteres juntos.", "Pressione um halter contra o outro durante toda a subida.", ["Hex press"], ["Hipertrofia"]],
+  ]),
+  Costas: createExerciseCatalog([
+    ["Puxada frontal pronada", "Iniciante", "Composto", "Polia e barra longa", ["Biceps", "Redondo maior"], "Puxada vertical para largura de dorsais.", "Leve a barra ao peitoral sem perder a postura do tronco.", ["Puxada frontal aberta", "Puxada neutra"], ["Hipertrofia", "Resistencia"], ["Puxada frontal"]],
+    ["Puxada frontal supinada", "Iniciante", "Composto", "Polia e barra reta", ["Biceps", "Braquial"], "Variante com maior participacao dos flexores do cotovelo.", "Puxe com cotovelos para baixo e peito elevado.", ["Pulldown supinado"], ["Hipertrofia"], ["Puxada supinada"]],
+    ["Puxada neutra na maquina", "Iniciante", "Composto", "Maquina", ["Biceps", "Trapezio medio"], "Trajetoria guiada para dorsais e controle de escapulas.", "Nao eleve os ombros no inicio da puxada.", ["Puxada neutra na polia"], ["Hipertrofia", "Iniciante"]],
+    ["Remada curvada com barra", "Intermediario", "Composto", "Barra", ["Biceps", "Lombar"], "Movimento base para espessura dorsal.", "Incline o tronco mantendo coluna neutra e barra proxima ao corpo.", ["Pendlay row", "Remada curvada pronada"], ["Hipertrofia", "Forca"], ["Remada curvada"]],
+    ["Remada unilateral com halter", "Iniciante", "Composto", "Halter e banco", ["Biceps", "Trapezio medio"], "Excelente para corrigir assimetrias entre os lados.", "Apoie bem a mao livre e puxe o cotovelo para tras.", ["Remada serrote"], ["Hipertrofia"], ["Remada serrote"]],
+    ["Remada baixa na polia", "Iniciante", "Composto", "Polia", ["Biceps", "Romboides"], "Mantem tensao constante na fase concentrica e eccentrica.", "Evite jogar o tronco para tras e inicie com depressao escapular.", ["Remada baixa com triangulo"], ["Hipertrofia", "Resistencia"], ["Remada baixa"]],
+    ["Remada cavalinho", "Intermediario", "Composto", "Barra T", ["Biceps", "Trapezio medio"], "Variante potente para densidade de costas.", "Tronco firme e movimento liderado pelos cotovelos.", ["T-bar row apoiada"], ["Hipertrofia", "Forca"]],
+    ["Pulldown na polia", "Iniciante", "Isolado", "Polia", ["Triceps longo", "Peitoral"], "Extensao de ombro focada em dorsais.", "Mantenha bracos semi estendidos e ombros longe das orelhas.", ["Straight-arm pulldown"], ["Hipertrofia", "Emagrecimento"], ["Pulldown"]],
+    ["Barra fixa pronada", "Avancado", "Composto", "Peso corporal", ["Biceps", "Core"], "Exercicio classico para largura e controle corporal.", "Inicie pela escapula e evite impulso das pernas.", ["Barra fixa assistida"], ["Forca", "Hipertrofia"], ["Barra fixa"]],
+    ["Barra fixa supinada", "Avancado", "Composto", "Peso corporal", ["Biceps", "Braquial"], "Versao com maior recrutamento de biceps.", "Suba com peito aberto e pes cruzados para estabilidade.", ["Chin-up assistido"], ["Forca", "Hipertrofia"]],
+    ["Levantamento terra convencional", "Avancado", "Composto", "Barra", ["Gluteos", "Posterior de coxa"], "Padrao de dobradica completo com forte demanda de cadeia posterior.", "Barra rente ao corpo e lombar neutra desde a partida.", ["Terra com hex bar", "Terra romeno"], ["Forca", "Hipertrofia"], ["Levantamento terra"]],
+    ["Remada apoiada no banco inclinado", "Iniciante", "Composto", "Halteres e banco inclinado", ["Biceps", "Romboides"], "Reduz compensacoes e facilita foco na dorsal.", "Mantenha o peito apoiado no banco para estabilizar o tronco.", ["Seal row"], ["Hipertrofia"]],
+    ["Remada maquina articulada", "Iniciante", "Composto", "Maquina", ["Biceps", "Trapezio medio"], "Trajetoria estavel para acumular volume com seguranca.", "Ajuste o assento para puxar na direcao do abdome superior.", ["Remada convergente"], ["Hipertrofia", "Iniciante"]],
+    ["Pull-over na polia", "Intermediario", "Isolado", "Polia", ["Peitoral", "Triceps longo"], "Mantem tensao continua na extensao do ombro.", "Use arco controlado e nao dobre demais os cotovelos.", ["Pull-over com halter"], ["Hipertrofia"], ["Pull over"]],
+    ["Face pull para costas altas", "Iniciante", "Isolado", "Polia e corda", ["Deltoide posterior", "Rotadores externos"], "Excelente para postura e parte alta das costas.", "Puxe a corda na direcao do rosto com cotovelos altos.", ["Face pull sentado"], ["Resistencia", "Reabilitacao"], ["Face pull"]],
+  ]),
+  Pernas: createExerciseCatalog([
+    ["Agachamento livre com barra", "Intermediario", "Composto", "Barra", ["Gluteos", "Core"], "Principal exercicio global para membros inferiores.", "Desca com joelhos alinhados aos pes e tronco firme.", ["Agachamento high bar", "Agachamento low bar"], ["Hipertrofia", "Forca"], ["Agachamento livre"]],
+    ["Agachamento frontal com barra", "Avancado", "Composto", "Barra", ["Core", "Gluteos"], "Aumenta a demanda de quadriceps e controle postural.", "Cotovelos altos e tronco mais vertical durante todo o movimento.", ["Front squat no smith"], ["Forca", "Hipertrofia"]],
+    ["Hack squat", "Iniciante", "Composto", "Maquina", ["Gluteos", "Posterior de coxa"], "Opcao guiada para gerar alto volume de pernas.", "Mantenha quadril e costas apoiados na plataforma.", ["Hack reverse"], ["Hipertrofia", "Iniciante"], ["Agachamento hack"]],
+    ["Leg press 45", "Iniciante", "Composto", "Maquina", ["Gluteos", "Posterior de coxa"], "Permite alta sobrecarga com estabilidade.", "Nao solte o quadril no final da descida.", ["Leg press horizontal", "Leg press unilateral"], ["Hipertrofia", "Forca"], ["Leg press"]],
+    ["Cadeira extensora", "Iniciante", "Isolado", "Maquina", ["Reto femoral"], "Isolamento de quadriceps com facil controle de carga.", "Alinhe o eixo da maquina ao joelho e suba sem impulsos.", ["Extensora unilateral"], ["Hipertrofia", "Reabilitacao"]],
+    ["Mesa flexora", "Iniciante", "Isolado", "Maquina", ["Gastrocnemio"], "Foco em flexores de joelho e posterior de coxa.", "Mantenha quadril colado ao banco e retorno controlado.", ["Flexora sentada", "Flexora unilateral"], ["Hipertrofia", "Reabilitacao"]],
+    ["Agachamento bulgaro com halteres", "Intermediario", "Composto", "Halteres e banco", ["Gluteos", "Core"], "Unilateral intenso para quadriceps e gluteos.", "Desca em linha reta sem deixar o joelho colapsar.", ["Bulgaro no smith"], ["Hipertrofia", "Resistencia"], ["Agachamento bulgaro"]],
+    ["Afundo caminhando com halteres", "Intermediario", "Composto", "Halteres", ["Gluteos", "Posterior de coxa"], "Desenvolve pernas com demanda alta de equilibrio.", "Passos firmes e joelho de tras proximo ao solo.", ["Afundo estacionario"], ["Hipertrofia", "Emagrecimento"], ["Afundo"]],
+    ["Passada no smith", "Iniciante", "Composto", "Smith machine", ["Gluteos", "Core"], "Versao guiada para controlar melhor a trajetoria.", "Mantenha a passada longa e o tronco estavel.", ["Passada reversa no smith"], ["Hipertrofia"], ["Passada"]],
+    ["Stiff com barra", "Intermediario", "Composto", "Barra", ["Gluteos", "Lombar"], "Dobradiça de quadril com foco em posterior de coxa.", "Barra rente as pernas e joelhos levemente flexionados.", ["Stiff com halteres"], ["Hipertrofia", "Forca"], ["Stiff"]],
+    ["Terra romeno com halteres", "Intermediario", "Composto", "Halteres", ["Gluteos", "Lombar"], "Variante livre para cadeia posterior com amplitude controlada.", "Quadril vai para tras sem arredondar a coluna.", ["Terra romeno unilateral"], ["Hipertrofia", "Resistencia"], ["Terra romeno"]],
+    ["Agachamento sumo com halter", "Iniciante", "Composto", "Halter", ["Gluteos", "Adutores"], "Base ampla para trabalhar pernas e adutores.", "Joelhos acompanham a abertura dos pes durante a descida.", ["Agachamento sumo com barra"], ["Hipertrofia", "Emagrecimento"]],
+    ["Step-up com halteres", "Iniciante", "Composto", "Halteres e caixa", ["Gluteos", "Panturrilhas"], "Movimento unilateral funcional para pernas.", "Apoie o pe inteiro na caixa e evite impulso exagerado da perna de baixo.", ["Step-up alto", "Step-up lateral"], ["Resistencia", "Emagrecimento"], ["Step-up"]],
+    ["Avanco reverso com halteres", "Iniciante", "Composto", "Halteres", ["Gluteos", "Core"], "Opcao amigavel para joelhos com grande controle.", "Leve a perna para tras mantendo o tronco estavel.", ["Avanco alternado"], ["Hipertrofia", "Resistencia"]],
+    ["Sissy squat assistido", "Avancado", "Isolado", "Peso corporal e apoio", ["Reto femoral"], "Variante exigente para quadriceps com grande alavanca.", "Use apoio seguro e mantenha quadril estendido durante a descida.", ["Spanish squat"], ["Hipertrofia"]],
+  ]),
+  Gluteos: createExerciseCatalog([
+    ["Elevacao pelvica com barra", "Intermediario", "Composto", "Barra e banco", ["Posterior de coxa", "Core"], "Principal exercicio para gluteo maximo com alta sobrecarga.", "Queixo recolhido e costelas baixas no topo do movimento.", ["Hip thrust no smith", "Hip thrust unilateral"], ["Hipertrofia", "Forca"], ["Elevacao pelvica"]],
+    ["Ponte glutea unilateral", "Iniciante", "Composto", "Peso corporal", ["Core", "Posterior de coxa"], "Boa opcao para estabilidade de quadril e ativacao unilateral.", "Empurre o solo pelo calcaneo e mantenha quadris alinhados.", ["Ponte glutea bilateral"], ["Resistencia", "Reabilitacao"], ["Ponte glutea"]],
+    ["Coice no cabo", "Iniciante", "Isolado", "Polia", ["Posterior de coxa"], "Isola extensao de quadril com tensao continua.", "Tronco firme e sem girar a pelve durante a extensao.", ["Coice na maquina"], ["Hipertrofia"], ["Coice no cabo"]],
+    ["Abducao de quadril na maquina", "Iniciante", "Isolado", "Maquina", ["Gluteo medio"], "Foco em gluteo medio e estabilidade do quadril.", "Evite jogar o tronco para frente para roubar a carga.", ["Abducao com miniband"], ["Hipertrofia", "Reabilitacao"], ["Abducao de quadril"]],
+    ["Kickback na maquina", "Iniciante", "Isolado", "Maquina", ["Posterior de coxa"], "Extensao guiada de quadril com facil controle.", "Mantenha a pelvis neutra e finalize com contracao voluntaria.", ["Kickback com caneleira"], ["Hipertrofia"]],
+    ["Agachamento sumo com barra", "Intermediario", "Composto", "Barra", ["Adutores", "Quadriceps"], "Base ampla para fortalecer gluteos e adutores.", "Pense em abrir o chao com os pes ao subir.", ["Agachamento sumo com halter"], ["Hipertrofia", "Forca"]],
+    ["Step-up alto", "Intermediario", "Composto", "Halteres e caixa alta", ["Quadriceps", "Panturrilhas"], "Variante com maior exigencia de extensao de quadril.", "Suba controlando a descida e sem impulso da perna de tras.", ["Step-up com joelho alto"], ["Hipertrofia", "Resistencia"]],
+    ["Glute bridge com miniband", "Iniciante", "Composto", "Peso corporal e miniband", ["Gluteo medio", "Core"], "Ativacao acessivel para gluteos e controle de joelhos.", "Empurre a banda para fora sem perder a ponte.", ["Ponte com pausa isometrica"], ["Iniciante", "Reabilitacao"]],
+    ["Stiff com foco em gluteos", "Intermediario", "Composto", "Barra ou halteres", ["Posterior de coxa", "Lombar"], "Dobradiça de quadril enfatizando extensao glutea.", "Segure a carga proxima do corpo e empurre o quadril para tras.", ["Terra romeno com pausa"], ["Hipertrofia", "Forca"]],
+    ["Afundo bulgaro com tronco inclinado", "Intermediario", "Composto", "Halteres e banco", ["Quadriceps", "Core"], "Inclina o tronco para aumentar a participacao de gluteos.", "Mantenha a canela dianteira mais vertical durante a descida.", ["Bulgaro com passada longa"], ["Hipertrofia"]],
+    ["Frog pump", "Iniciante", "Isolado", "Peso corporal ou anilha", ["Adutores"], "Curta amplitude com alta sensacao de queima em gluteos.", "Una as plantas dos pes e contraia forte no topo.", ["Frog pump com banda"], ["Hipertrofia", "Resistencia"]],
+    ["Cadeira abdutora inclinada", "Iniciante", "Isolado", "Maquina", ["Gluteo medio"], "Altera a inclinacao para maximizar gluteos laterais.", "Segure o tronco estavel e abra as pernas sem trancos.", ["Abducao sentada"], ["Hipertrofia"]],
+    ["Pull-through na polia", "Iniciante", "Composto", "Polia e corda", ["Posterior de coxa", "Lombar"], "Padrao de dobradica com foco em extensao de quadril.", "A corda passa entre as pernas e o quadril guia o movimento.", ["Kettlebell swing tecnico"], ["Hipertrofia", "Resistencia"]],
+    ["Good morning com barra leve", "Avancado", "Composto", "Barra", ["Posterior de coxa", "Lombar"], "Exercicio tecnico para cadeia posterior e controle lombopelvico.", "Use carga moderada e amplitude que preserve a coluna neutra.", ["Good morning sentado"], ["Forca", "Hipertrofia"]],
+    ["Hip thrust no smith", "Intermediario", "Composto", "Smith machine e banco", ["Posterior de coxa", "Core"], "Versao guiada para gluteos com setup previsivel.", "Posicione a barra sobre o quadril e finalize com retroversao leve.", ["Hip thrust com banda"], ["Hipertrofia", "Forca"]],
+  ]),
+  Ombros: createExerciseCatalog([
+    ["Desenvolvimento militar com barra", "Intermediario", "Composto", "Barra", ["Triceps", "Core"], "Press vertical classico para deltoides e forca geral.", "Gluteos e abdomen ativos para evitar hiperextensao lombar.", ["Push press", "Desenvolvimento sentado"], ["Forca", "Hipertrofia"], ["Desenvolvimento militar"]],
+    ["Desenvolvimento com halteres sentado", "Iniciante", "Composto", "Halteres e banco", ["Triceps", "Core"], "Opcao estavel para ombros com amplitude segura.", "Mantenha punhos empilhados sobre os cotovelos.", ["Desenvolvimento neutro sentado"], ["Hipertrofia", "Iniciante"], ["Desenvolvimento com halteres"]],
+    ["Arnold press", "Intermediario", "Composto", "Halteres", ["Triceps", "Deltoide anterior"], "Rotacao controlada para grande amplitude em deltoides.", "Nao acelere a rotacao e mantenha o tronco firme.", ["Arnold press sentado"], ["Hipertrofia"]],
+    ["Desenvolvimento na maquina", "Iniciante", "Composto", "Maquina", ["Triceps"], "Variante guiada para acumular volume com menos demanda tecnica.", "Ajuste o banco para iniciar na altura do queixo.", ["Shoulder press convergente"], ["Hipertrofia", "Iniciante"]],
+    ["Elevacao lateral com halteres", "Iniciante", "Isolado", "Halteres", ["Supraespinal"], "Base do treino para deltoide lateral.", "Suba ate a linha do ombro sem encolher o trapezio.", ["Elevacao lateral inclinada", "Elevacao lateral parcial"], ["Hipertrofia"], ["Elevacao lateral"]],
+    ["Elevacao lateral na polia", "Intermediario", "Isolado", "Polia", ["Supraespinal"], "Mantem tensao constante desde o inicio do arco.", "Inicie de leve afastamento da polia para melhor linha de forca.", ["Elevacao lateral unilateral"], ["Hipertrofia"]],
+    ["Elevacao frontal com halteres", "Iniciante", "Isolado", "Halteres", ["Peitoral superior"], "Foco em deltoide anterior com controle.", "Eleve sem usar embalo e desca lentamente.", ["Elevacao frontal alternada"], ["Hipertrofia"], ["Elevacao frontal"]],
+    ["Elevacao frontal com barra", "Intermediario", "Isolado", "Barra", ["Peitoral superior"], "Permite carga maior para deltoide anterior.", "Segure a barra com pegada confortavel e sem jogar lombar.", ["Elevacao frontal com anilha"], ["Hipertrofia"]],
+    ["Crucifixo inverso no peck deck", "Iniciante", "Isolado", "Maquina", ["Romboides", "Trapezio medio"], "Trabalha deltoide posterior com boa estabilidade.", "Peito apoiado e movimento abrindo pelos cotovelos.", ["Reverse fly na maquina"], ["Hipertrofia", "Postura"], ["Crucifixo inverso"]],
+    ["Crucifixo inverso com halteres", "Intermediario", "Isolado", "Halteres", ["Romboides", "Trapezio medio"], "Variante livre para parte posterior dos ombros.", "Incline o tronco e mantenha a lombar neutra.", ["Reverse fly no banco inclinado"], ["Hipertrofia"]],
+    ["Face pull na polia", "Iniciante", "Isolado", "Polia e corda", ["Rotadores externos", "Trapezio medio"], "Excelente para saude do ombro e deltoide posterior.", "Puxe a corda separando as pontas no final do movimento.", ["Face pull ajoelhado"], ["Reabilitacao", "Resistencia"], ["Face pull"]],
+    ["Remada alta com barra W", "Intermediario", "Composto", "Barra W", ["Trapezio", "Biceps"], "Movimento para deltoide lateral e parte alta das costas.", "Suba os cotovelos acima das maos sem elevar demais a carga.", ["Remada alta na polia"], ["Hipertrofia"], ["Remada alta"]],
+    ["Landmine press unilateral", "Intermediario", "Composto", "Barra landmine", ["Core", "Serratil"], "Press diagonal util para ombros e estabilidade.", "Mantenha costelas baixas e quadril alinhado.", ["Landmine press meio ajoelhado"], ["Forca", "Reabilitacao"]],
+    ["Push press", "Avancado", "Composto", "Barra", ["Triceps", "Quadriceps"], "Usa impulso de pernas para sobrecarga acima da cabeca.", "Dip curto e explosivo, finalizando com tronco firme.", ["Push jerk"], ["Forca", "Potencia"]],
+    ["Y-raise no banco inclinado", "Intermediario", "Isolado", "Halteres leves e banco", ["Trapezio inferior", "Rotadores externos"], "Fortalece deltoide e musculatura estabilizadora da escapula.", "Movimento controlado, polegares apontando para cima.", ["Y-raise na polia"], ["Reabilitacao", "Resistencia"]],
+  ]),
+  Biceps: createExerciseCatalog([
+    ["Rosca direta com barra", "Iniciante", "Isolado", "Barra", ["Braquial", "Antebracos"], "Padrao classico para flexores do cotovelo.", "Cotovelos fixos ao lado do tronco e sem balanco.", ["Rosca direta no cabo"], ["Hipertrofia", "Forca"], ["Rosca direta"]],
+    ["Rosca alternada com halteres", "Iniciante", "Isolado", "Halteres", ["Braquial", "Antebracos"], "Permite maior controle unilateral e supinacao.", "Supine progressivamente o punho durante a subida.", ["Rosca alternada sentado"], ["Hipertrofia"], ["Rosca alternada"]],
+    ["Rosca martelo com halteres", "Iniciante", "Isolado", "Halteres", ["Braquial", "Braquiorradial"], "Fortalece biceps e antebraco com pegada neutra.", "Evite projetar os cotovelos para frente.", ["Rosca martelo alternada", "Rosca cross body"], ["Hipertrofia", "Forca"], ["Rosca martelo"]],
+    ["Rosca Scott na maquina", "Iniciante", "Isolado", "Maquina", ["Braquial"], "Isolamento com estabilidade para a fase concentrica.", "Mantenha axilas bem apoiadas no banco Scott.", ["Rosca Scott com barra W"], ["Hipertrofia"], ["Rosca Scott"]],
+    ["Rosca concentrada unilateral", "Intermediario", "Isolado", "Halter", ["Braquial"], "Excelente para foco em encurtamento do biceps.", "Apoie o cotovelo na parte interna da coxa e suba sem embalo.", ["Rosca concentrada sentada"], ["Hipertrofia"], ["Rosca concentrada"]],
+    ["Rosca inversa com barra W", "Intermediario", "Isolado", "Barra W", ["Braquiorradial", "Extensores do antebraco"], "Fortalece antebracos e braquial com pegada pronada.", "Punhos neutros e cotovelos colados ao corpo.", ["Rosca inversa na polia"], ["Resistencia", "Hipertrofia"], ["Rosca inversa"]],
+    ["Rosca na polia baixa", "Iniciante", "Isolado", "Polia", ["Braquial", "Antebracos"], "Tensao constante durante toda a flexao do cotovelo.", "Use postura ereta e evite balanço do tronco.", ["Rosca com corda", "Rosca com barra reta na polia"], ["Hipertrofia"]],
+    ["Rosca spider com barra W", "Intermediario", "Isolado", "Barra W e banco inclinado", ["Braquial"], "Diminui roubos e aumenta foco no encurtamento.", "Peito apoiado no banco e descida completa com controle.", ["Spider curl com halteres"], ["Hipertrofia"]],
+    ["Rosca 21 com barra", "Intermediario", "Isolado", "Barra", ["Braquial", "Antebracos"], "Metodo de series parciais e completas para alto estresse metabolico.", "Controle cada segmento da amplitude e nao use embalo.", ["Rosca 21 com halteres"], ["Hipertrofia", "Resistencia"]],
+    ["Chin-up com foco em biceps", "Avancado", "Composto", "Peso corporal", ["Costas", "Braquial"], "Puxada supinada que combina dorsais e forte recrutamento de biceps.", "Inicie o movimento com peito alto e cotovelos para baixo.", ["Chin-up assistido"], ["Forca", "Hipertrofia"]],
+    ["Rosca martelo na corda", "Iniciante", "Isolado", "Polia e corda", ["Braquial", "Braquiorradial"], "Mantem tensao continua em pegada neutra.", "Separe levemente as pontas da corda no final da subida.", ["Rosca corda alternada"], ["Hipertrofia"]],
+    ["Rosca inclinada com halteres", "Intermediario", "Isolado", "Halteres e banco inclinado", ["Braquial"], "Alongamento forte do biceps pela posicao de ombro em extensao.", "Ombros relaxados e cotovelos apontando para baixo.", ["Rosca inclinada alternada"], ["Hipertrofia"]],
+    ["Rosca preacher com halter", "Intermediario", "Isolado", "Halter e banco Scott", ["Braquial"], "Permite trabalhar unilateralmente em banco Scott.", "Nao perca a tensao no final da descida.", ["Preacher curl na polia"], ["Hipertrofia"]],
+    ["Rosca cross body", "Iniciante", "Isolado", "Halteres", ["Braquial", "Braquiorradial"], "Martelo diagonal que melhora densidade do braco.", "Leve o halter em direcao ao ombro oposto sem girar o tronco.", ["Rosca martelo alternada"], ["Hipertrofia"]],
+    ["Rosca Zottman", "Intermediario", "Isolado", "Halteres", ["Antebracos", "Braquial"], "Combina supinacao na subida e pronacao na descida.", "Gire os punhos com controle no topo da repeticao.", ["Rosca Zottman sentada"], ["Hipertrofia", "Resistencia"]],
+  ]),
+  Triceps: createExerciseCatalog([
+    ["Triceps testa com barra W", "Intermediario", "Isolado", "Barra W e banco", ["Peitoral", "Deltoide anterior"], "Extensao de cotovelo com grande alongamento do triceps.", "Cotovelos apontados para cima e sem abrir excessivamente.", ["Skull crusher com halteres"], ["Hipertrofia", "Forca"], ["Triceps testa"]],
+    ["Triceps frances com halter", "Iniciante", "Isolado", "Halter", ["Core"], "Extensao acima da cabeca para maior foco na cabeca longa.", "Mantenha cotovelos proximos e descida controlada atras da cabeca.", ["Frances bilateral", "Frances sentado"], ["Hipertrofia"], ["Triceps frances"]],
+    ["Triceps corda na polia", "Iniciante", "Isolado", "Polia e corda", ["Antebracos"], "Variante confortavel e versatil para alto volume.", "Separe as pontas da corda no final da extensao.", ["Pushdown com corda unilateral"], ["Hipertrofia", "Resistencia"], ["Triceps corda"]],
+    ["Triceps pulley com barra reta", "Iniciante", "Isolado", "Polia e barra reta", ["Antebracos"], "Pushdown tradicional para triceps com facil progressao.", "Cotovelos fixos junto ao corpo e punhos neutros.", ["Pushdown com barra V"], ["Hipertrofia"]],
+    ["Mergulho entre bancos", "Iniciante", "Composto", "Peso corporal e bancos", ["Peitoral", "Deltoide anterior"], "Opcao acessivel de triceps com peso corporal.", "Desca ate confortavel para o ombro e suba sem tranco.", ["Mergulho com joelhos flexionados"], ["Resistencia", "Emagrecimento"], ["Mergulho"]],
+    ["Supino fechado com barra", "Intermediario", "Composto", "Barra e banco", ["Peitoral", "Deltoide anterior"], "Press horizontal com maior enfase em triceps.", "Pegada fechada sem exagero e cotovelos apontando para baixo.", ["Supino fechado no smith"], ["Forca", "Hipertrofia"], ["Supino fechado"]],
+    ["Triceps coice com halter", "Iniciante", "Isolado", "Halter", ["Deltoide posterior"], "Extensao de cotovelo em posicao inclinada.", "Fixe o braco paralelo ao tronco antes de estender.", ["Kickback na polia"], ["Hipertrofia"], ["Coice de triceps"]],
+    ["Extensao acima da cabeca na polia", "Intermediario", "Isolado", "Polia e corda", ["Core"], "Excelente para cabeca longa do triceps.", "Incline levemente o tronco e mantenha os cotovelos altos.", ["Overhead extension unilateral"], ["Hipertrofia"]],
+    ["Paralelas com foco em triceps", "Avancado", "Composto", "Barras paralelas", ["Peitoral", "Deltoide anterior"], "Movimento intenso com alta carga relativa para triceps.", "Tronco mais vertical e cotovelos apontando para tras.", ["Paralelas assistidas"], ["Forca", "Hipertrofia"]],
+    ["Triceps unilateral na polia", "Iniciante", "Isolado", "Polia", ["Antebracos"], "Ajuda a equilibrar os dois lados com mais controle.", "Estabilize o ombro e estenda ate o final com controle.", ["Pushdown unilateral reverso"], ["Hipertrofia", "Reabilitacao"]],
+    ["Triceps na maquina", "Iniciante", "Isolado", "Maquina", ["Antebracos"], "Versao guiada util para iniciantes e series de volume.", "Ajuste o assento para alinhar cotovelos ao eixo da maquina.", ["Dip machine"], ["Hipertrofia", "Iniciante"]],
+    ["Triceps banco", "Iniciante", "Composto", "Peso corporal e banco", ["Peitoral", "Deltoide anterior"], "Movimento simples para triceps usando apoio no banco.", "Desca pouco se houver desconforto no ombro.", ["Bench dips com anilha"], ["Resistencia"], ["Triceps banco"]],
+    ["JM press com barra", "Avancado", "Composto", "Barra e banco", ["Peitoral", "Deltoide anterior"], "Combina supino fechado e extensao para sobrecarregar triceps.", "Trajetoria curta com cotovelos controlados.", ["JM press no smith"], ["Forca", "Hipertrofia"]],
+    ["Tate press", "Intermediario", "Isolado", "Halteres e banco", ["Peitoral"], "Variante de extensao para porcao medial do triceps.", "Mantenha cotovelos abertos com controle da carga.", ["Tate press alternado"], ["Hipertrofia"]],
+    ["Flexao diamante", "Intermediario", "Composto", "Peso corporal", ["Peitoral", "Core"], "Flexao fechada para grande participacao de triceps.", "Mantenha maos proximas e tronco rigido do inicio ao fim.", ["Flexao diamante com joelhos apoiados"], ["Resistencia", "Emagrecimento"]],
+  ]),
+  Abdomen: createExerciseCatalog([
+    ["Prancha frontal", "Iniciante", "Isometrico", "Peso corporal", ["Gluteos", "Ombros"], "Base de estabilidade anterior para o core.", "Contraia gluteos e mantenha lombar neutra sem afundar o quadril.", ["Prancha com apoio elevado", "Prancha com deslocamento"], ["Resistencia", "Reabilitacao"], ["Prancha"]],
+    ["Prancha lateral", "Iniciante", "Isometrico", "Peso corporal", ["Gluteo medio", "Obliquos"], "Fortalece anti-flexao lateral e estabilidade do tronco.", "Empurre o antebraco no solo e alinhe ombro, quadril e tornozelos.", ["Prancha lateral com joelho apoiado"], ["Resistencia", "Reabilitacao"]],
+    ["Crunch no solo", "Iniciante", "Isolado", "Peso corporal", ["Flexores de quadril"], "Flexao curta de tronco para reto abdominal.", "Tire as escapas do solo sem puxar o pescoco com as maos.", ["Crunch com pausa"], ["Hipertrofia", "Iniciante"], ["Crunch"]],
+    ["Crunch na maquina", "Iniciante", "Isolado", "Maquina", ["Obliquos"], "Permite progressao de carga no reto abdominal.", "Expire no encurtamento e volte controlando a carga.", ["Crunch no cabo"], ["Hipertrofia"]],
+    ["Abdominal infra no banco", "Iniciante", "Isolado", "Banco", ["Flexores de quadril"], "Eleva pelve e pernas com foco em porcao inferior do abdomen.", "Evite embalo das pernas e pense em enrolar a pelve.", ["Infra com joelhos flexionados"], ["Hipertrofia"], ["Abdominal infra"]],
+    ["Elevacao de pernas na barra", "Avancado", "Composto", "Barra fixa", ["Flexores de quadril", "Obliquos"], "Desafia o core em suspensao com grande amplitude.", "Nao balance o corpo e inicie pela retroversao pelvica.", ["Elevacao de joelhos na barra"], ["Forca", "Hipertrofia"], ["Elevacao de pernas"]],
+    ["Ab wheel", "Avancado", "Composto", "Roda abdominal", ["Latissimos", "Gluteos"], "Anti-extensao intensa para todo o core.", "Deslize apenas ate onde conseguir manter a lombar neutra.", ["Ab wheel ajoelhado", "Rollout na barra"], ["Forca", "Resistencia"]],
+    ["Dead bug", "Iniciante", "Controle motor", "Peso corporal", ["Flexores profundos", "Gluteos"], "Padrao basico de estabilidade lombopelvica.", "Costas baixas coladas no solo durante o movimento alternado.", ["Dead bug com banda"], ["Reabilitacao", "Iniciante"]],
+    ["Hollow hold", "Intermediario", "Isometrico", "Peso corporal", ["Flexores de quadril", "Serratil"], "Posicao global de anti-extensao muito usada em ginastica.", "Mantenha lombar colada no solo e costelas encaixadas.", ["Hollow rocks"], ["Resistencia", "Forca"]],
+    ["Russian twist com anilha", "Intermediario", "Isolado", "Anilha", ["Obliquos", "Flexores de quadril"], "Rotacao controlada de tronco para obliquos.", "Gire o tronco, nao apenas os bracos, mantendo peito aberto.", ["Russian twist sem carga"], ["Resistencia", "Emagrecimento"]],
+    ["Mountain climber", "Iniciante", "Composto", "Peso corporal", ["Ombros", "Flexores de quadril"], "Combina core e gasto energetico em alta cadencia.", "Quadris baixos e maos ativas empurrando o solo.", ["Mountain climber cruzado"], ["Emagrecimento", "Resistencia"]],
+    ["Pallof press", "Iniciante", "Anti-rotacao", "Polia ou elastico", ["Obliquos", "Gluteos"], "Treina resistencia a rotacao para estabilidade funcional.", "Expulse o ar ao estender os bracos sem girar o tronco.", ["Pallof hold", "Pallof press ajoelhado"], ["Reabilitacao", "Resistencia"]],
+    ["Abdominal na polia ajoelhado", "Intermediario", "Isolado", "Polia e corda", ["Flexores de quadril"], "Permite carga alta para flexao de tronco.", "Arredonde a coluna toracica, nao apenas puxe com os bracos.", ["Crunch na polia em pe"], ["Hipertrofia"], ["Abdominal na polia"]],
+    ["Reverse crunch", "Iniciante", "Isolado", "Peso corporal", ["Flexores de quadril"], "Versao controlada de retroversao pelvica no solo.", "Suba o quadril suavemente sem impulsionar com as pernas.", ["Reverse crunch no banco"], ["Hipertrofia", "Iniciante"]],
+    ["Sit-up com peso", "Intermediario", "Composto", "Anilha ou halter", ["Flexores de quadril"], "Variante mais dinamica para tronco completo.", "Controle a descida e evite perder a lombar no final.", ["Sit-up sem peso"], ["Resistencia", "Hipertrofia"]],
+  ]),
+  Panturrilhas: createExerciseCatalog([
+    ["Panturrilha em pe na maquina", "Iniciante", "Isolado", "Maquina", ["Soleo"], "Trabalha gastrocnemio em grande amplitude.", "Desca ate alongar e suba ate o pico sem quicar.", ["Standing calf raise unilateral"], ["Hipertrofia", "Resistencia"], ["Panturrilha em pe"]],
+    ["Panturrilha sentada na maquina", "Iniciante", "Isolado", "Maquina", ["Soleo"], "Enfatiza o soleo com joelhos flexionados.", "Mantenha quadril estavel e ritmo controlado.", ["Panturrilha sentada unilateral"], ["Hipertrofia"], ["Panturrilha sentado"]],
+    ["Panturrilha no leg press", "Iniciante", "Isolado", "Leg press", ["Soleo"], "Opcao segura para sobrecarga progressiva.", "Movimente apenas os tornozelos sem dobrar os joelhos.", ["Panturrilha no leg press unilateral"], ["Hipertrofia"], ["Panturrilha no leg press"]],
+    ["Panturrilha unilateral em degrau", "Iniciante", "Isolado", "Peso corporal e degrau", ["Soleo"], "Ajuda a corrigir assimetrias e melhorar amplitude.", "Segure apoio leve e use o calcanhar para alongar bem.", ["Panturrilha unilateral com halter"], ["Resistencia", "Reabilitacao"], ["Panturrilha unilateral"]],
+    ["Donkey calf raise", "Intermediario", "Isolado", "Maquina ou apoio", ["Soleo"], "Variante classica com grande alongamento em dorsiflexao.", "Quadril dobrado e coluna neutra durante toda a serie.", ["Donkey calf machine"], ["Hipertrofia"], ["Donkey calf raise"]],
+    ["Panturrilha no smith em pe", "Intermediario", "Isolado", "Smith machine", ["Soleo"], "Permite progressao consistente em pe com estabilidade.", "Use plataforma sob a ponta dos pes para ganhar amplitude.", ["Panturrilha no smith unilateral"], ["Hipertrofia", "Forca"]],
+    ["Panturrilha no hack machine", "Intermediario", "Isolado", "Hack machine", ["Soleo"], "Boa alternativa para sobrecarga alta em amplitude curta.", "Segure a plataforma firme e nao trave joelhos em excesso.", ["Hack calf raise reverso"], ["Hipertrofia"]],
+    ["Saltos na ponta dos pes", "Iniciante", "Pliometrico", "Peso corporal", ["Quadriceps", "Gluteos"], "Trabalha reatividade e resistencia de panturrilhas.", "Aterrisse macio e mantenha tornozelos ativos.", ["Pogo jumps"], ["Resistencia", "Condicionamento"]],
+    ["Farmer walk na ponta dos pes", "Intermediario", "Funcional", "Halteres", ["Core", "Antebracos"], "Combina isometria de panturrilha com estabilidade global.", "Passos curtos e controlados mantendo o calcanhar elevado.", ["Suitcase walk na ponta dos pes"], ["Resistencia", "Emagrecimento"]],
+    ["Panturrilha isometrica em degrau", "Iniciante", "Isometrico", "Peso corporal e degrau", ["Soleo"], "Mantem alta tensao sustentada no pico de contracao.", "Segure o topo sem perder alinhamento dos tornozelos.", ["Isometria unilateral em degrau"], ["Reabilitacao", "Resistencia"]],
+    ["Panturrilha com joelhos flexionados em pe", "Intermediario", "Isolado", "Smith ou halteres", ["Soleo"], "Variante em pe com foco maior em soleo.", "Mantenha joelhos semiflexionados durante toda a amplitude.", ["Bent-knee calf raise"], ["Hipertrofia"]],
+    ["Panturrilha na maquina horizontal", "Iniciante", "Isolado", "Maquina", ["Soleo"], "Opcao guiada para volume com estabilidade.", "Ritmo controlado e pause um segundo no pico da subida.", ["Panturrilha horizontal unilateral"], ["Hipertrofia"]],
+    ["Pogo jumps", "Intermediario", "Pliometrico", "Peso corporal", ["Quadriceps", "Tibial anterior"], "Saltos curtos e rapidos para elasticidade do tornozelo.", "Mantenha contato minimo com o solo e tronco alto.", ["Line hops"], ["Condicionamento", "Resistencia"]],
+    ["Panturrilha unilateral sentada", "Intermediario", "Isolado", "Maquina ou anilha", ["Soleo"], "Permite ajustar melhor carga lado a lado.", "Mantenha joelho estavel e amplitude completa.", ["Panturrilha sentada bilateral"], ["Hipertrofia"]],
+    ["Panturrilha no step com halteres", "Iniciante", "Isolado", "Halteres e step", ["Soleo"], "Versao simples para treinar em casa ou academia.", "Controle a descida abaixo do nivel do step antes de subir.", ["Panturrilha bilateral no step"], ["Resistencia", "Hipertrofia"]],
+  ]),
+});
+
+const CATEGORY_PRESENTATION = Object.freeze({
+  Peito: { subtitle: "Supinos, crucifixos e variacoes de empurrar." },
+  Costas: { subtitle: "Puxadas, remadas e movimentos de dorsal." },
+  Pernas: { subtitle: "Base, quadriceps e movimentos principais." },
+  Gluteos: { subtitle: "Extensao de quadril e foco em cadeia posterior." },
+  Ombros: { subtitle: "Presses, elevacoes e estabilidade escapular." },
+  Biceps: { subtitle: "Roscas e variacoes de flexao de cotovelo." },
+  Triceps: { subtitle: "Extensoes, empurradas e finalizacoes." },
+  Abdomen: { subtitle: "Core, controle postural e estabilizacao." },
+  Panturrilhas: { subtitle: "Flexao plantar, volume e resistencia local." },
 });
 
 const SPLIT_PRESET_LIBRARY = Object.freeze({
   Push: {
     groups: ["Peito", "Ombros", "Triceps"],
     exercises: [
-      { category: "Peito", name: "Supino reto", sets: "4", reps: "8", load: "" },
-      { category: "Peito", name: "Cross over", sets: "3", reps: "12", load: "" },
-      { category: "Ombros", name: "Desenvolvimento com halteres", sets: "4", reps: "10", load: "" },
-      { category: "Ombros", name: "Elevacao lateral", sets: "3", reps: "12", load: "" },
-      { category: "Triceps", name: "Triceps corda", sets: "3", reps: "12", load: "" },
+      { category: "Peito", name: "Supino reto com barra", sets: "4", reps: "8", load: "" },
+      { category: "Peito", name: "Crossover na polia alta", sets: "3", reps: "12", load: "" },
+      { category: "Ombros", name: "Desenvolvimento com halteres sentado", sets: "4", reps: "10", load: "" },
+      { category: "Ombros", name: "Elevacao lateral com halteres", sets: "3", reps: "12", load: "" },
+      { category: "Triceps", name: "Triceps corda na polia", sets: "3", reps: "12", load: "" },
     ],
   },
   Pull: {
     groups: ["Costas", "Biceps"],
     exercises: [
-      { category: "Costas", name: "Puxada frontal", sets: "4", reps: "10", load: "" },
-      { category: "Costas", name: "Remada baixa", sets: "4", reps: "10", load: "" },
-      { category: "Costas", name: "Barra fixa", sets: "3", reps: "8", load: "" },
-      { category: "Biceps", name: "Rosca direta", sets: "3", reps: "10", load: "" },
-      { category: "Biceps", name: "Rosca martelo", sets: "3", reps: "12", load: "" },
+      { category: "Costas", name: "Puxada frontal pronada", sets: "4", reps: "10", load: "" },
+      { category: "Costas", name: "Remada baixa na polia", sets: "4", reps: "10", load: "" },
+      { category: "Costas", name: "Barra fixa pronada", sets: "3", reps: "8", load: "" },
+      { category: "Biceps", name: "Rosca direta com barra", sets: "3", reps: "10", load: "" },
+      { category: "Biceps", name: "Rosca martelo com halteres", sets: "3", reps: "12", load: "" },
     ],
   },
   Legs: {
     groups: ["Pernas", "Gluteos", "Panturrilhas"],
     exercises: [
-      { category: "Pernas", name: "Agachamento livre", sets: "4", reps: "8", load: "" },
-      { category: "Pernas", name: "Leg press", sets: "4", reps: "12", load: "" },
+      { category: "Pernas", name: "Agachamento livre com barra", sets: "4", reps: "8", load: "" },
+      { category: "Pernas", name: "Leg press 45", sets: "4", reps: "12", load: "" },
       { category: "Pernas", name: "Mesa flexora", sets: "3", reps: "12", load: "" },
-      { category: "Gluteos", name: "Elevacao pelvica", sets: "4", reps: "10", load: "" },
-      { category: "Panturrilhas", name: "Panturrilha em pe", sets: "4", reps: "15", load: "" },
+      { category: "Gluteos", name: "Elevacao pelvica com barra", sets: "4", reps: "10", load: "" },
+      { category: "Panturrilhas", name: "Panturrilha em pe na maquina", sets: "4", reps: "15", load: "" },
     ],
   },
   Upper: {
     groups: ["Peito", "Costas", "Ombros", "Biceps", "Triceps"],
     exercises: [
-      { category: "Peito", name: "Supino inclinado", sets: "4", reps: "8", load: "" },
-      { category: "Costas", name: "Remada curvada", sets: "4", reps: "8", load: "" },
+      { category: "Peito", name: "Supino inclinado com barra", sets: "4", reps: "8", load: "" },
+      { category: "Costas", name: "Remada curvada com barra", sets: "4", reps: "8", load: "" },
       { category: "Ombros", name: "Arnold press", sets: "3", reps: "10", load: "" },
-      { category: "Biceps", name: "Rosca alternada", sets: "3", reps: "10", load: "" },
-      { category: "Triceps", name: "Triceps testa", sets: "3", reps: "10", load: "" },
+      { category: "Biceps", name: "Rosca alternada com halteres", sets: "3", reps: "10", load: "" },
+      { category: "Triceps", name: "Triceps testa com barra W", sets: "3", reps: "10", load: "" },
     ],
   },
   Lower: {
     groups: ["Pernas", "Gluteos", "Panturrilhas", "Abdomen"],
     exercises: [
-      { category: "Pernas", name: "Agachamento hack", sets: "4", reps: "10", load: "" },
-      { category: "Pernas", name: "Stiff", sets: "4", reps: "10", load: "" },
+      { category: "Pernas", name: "Hack squat", sets: "4", reps: "10", load: "" },
+      { category: "Pernas", name: "Stiff com barra", sets: "4", reps: "10", load: "" },
       { category: "Gluteos", name: "Coice no cabo", sets: "3", reps: "12", load: "" },
-      { category: "Panturrilhas", name: "Panturrilha sentado", sets: "4", reps: "15", load: "" },
-      { category: "Abdomen", name: "Prancha", sets: "3", reps: "30", load: "" },
+      { category: "Panturrilhas", name: "Panturrilha sentada na maquina", sets: "4", reps: "15", load: "" },
+      { category: "Abdomen", name: "Prancha frontal", sets: "3", reps: "30", load: "" },
     ],
   },
   Core: {
     groups: ["Abdomen", "Ombros"],
     exercises: [
-      { category: "Abdomen", name: "Crunch", sets: "3", reps: "15", load: "" },
-      { category: "Abdomen", name: "Elevacao de pernas", sets: "3", reps: "12", load: "" },
+      { category: "Abdomen", name: "Crunch no solo", sets: "3", reps: "15", load: "" },
+      { category: "Abdomen", name: "Elevacao de pernas na barra", sets: "3", reps: "12", load: "" },
       { category: "Abdomen", name: "Ab wheel", sets: "3", reps: "10", load: "" },
-      { category: "Ombros", name: "Face pull", sets: "3", reps: "15", load: "" },
-      { category: "Ombros", name: "Crucifixo inverso", sets: "3", reps: "12", load: "" },
+      { category: "Ombros", name: "Face pull na polia", sets: "3", reps: "15", load: "" },
+      { category: "Ombros", name: "Crucifixo inverso no peck deck", sets: "3", reps: "12", load: "" },
     ],
   },
 });
 
-const ALL_EXERCISES = Object.values(EXERCISE_LIBRARY).flat();
-const EXERCISE_CATEGORY_BY_NAME = new Map(
+const ALL_EXERCISE_DETAILS = Object.freeze(
   Object.entries(EXERCISE_LIBRARY).flatMap(([category, exercises]) =>
-    exercises.map((exercise) => [normalizeLookupValue(exercise), category]),
+    exercises.map((exercise) => ({ ...exercise, category })),
   ),
+);
+const ALL_EXERCISES = ALL_EXERCISE_DETAILS.map((exercise) => exercise.name);
+const EXERCISE_DETAILS_BY_NAME = new Map(
+  ALL_EXERCISE_DETAILS.flatMap((exercise) => [
+    [normalizeLookupValue(exercise.name), exercise],
+    ...exercise.aliases.map((alias) => [normalizeLookupValue(alias), exercise]),
+  ]),
+);
+const EXERCISE_CATEGORY_BY_NAME = new Map(
+  Array.from(EXERCISE_DETAILS_BY_NAME.entries(), ([normalizedName, exercise]) => [normalizedName, exercise.category]),
 );
 
 const elements = {
@@ -193,14 +308,14 @@ const elements = {
   briefingChipFrequency: document.querySelector("#briefing-chip-frequency"),
   toolbarTrainingName: document.querySelector("#toolbar-training-name"),
   toolbarExerciseCount: document.querySelector("#toolbar-exercise-count"),
-  bodyMapSelectedLabel: document.querySelector("#body-map-selected-label"),
-  bodyMapSelectedCopy: document.querySelector("#body-map-selected-copy"),
   exerciseDrawer: document.querySelector("#exercise-drawer"),
   exerciseDrawerTraining: document.querySelector("#exercise-drawer-training"),
   exerciseDrawerCategory: document.querySelector("#exercise-drawer-category"),
+  exerciseDrawerCategoryBadge: document.querySelector("#exercise-drawer-category-badge"),
   exerciseDrawerDescription: document.querySelector("#exercise-drawer-description"),
   exerciseDrawerSearch: document.querySelector("#exercise-drawer-search"),
   exerciseDrawerMeta: document.querySelector("#exercise-drawer-meta"),
+  exerciseDrawerMetaCopy: document.querySelector("#exercise-drawer-meta-copy"),
   exerciseDrawerList: document.querySelector("#exercise-drawer-list"),
   categoryDrawer: document.querySelector("#category-drawer"),
   categoryDrawerTraining: document.querySelector("#category-drawer-training"),
@@ -212,6 +327,7 @@ const elements = {
 const exerciseDrawerState = {
   exerciseId: null,
   query: "",
+  previewName: "",
 };
 
 const categoryDrawerState = {
@@ -257,10 +373,10 @@ const defaultState = () => ({
   lastSavedAt: new Date().toISOString(),
   profile: createEmptyProfile(),
   trainings: [
-    { id: "training-a", name: "Treino A", splitLabel: "", focusGroups: [], bodyMapCategory: "", bodyMapView: "front", exercises: [defaultExercise()] },
-    { id: "training-b", name: "Treino B", splitLabel: "", focusGroups: [], bodyMapCategory: "", bodyMapView: "front", exercises: [] },
-    { id: "training-c", name: "Treino C", splitLabel: "", focusGroups: [], bodyMapCategory: "", bodyMapView: "front", exercises: [] },
-    { id: "training-d", name: "Treino D", splitLabel: "", focusGroups: [], bodyMapCategory: "", bodyMapView: "front", exercises: [] },
+    { id: "training-a", name: "Treino A", splitLabel: "", focusGroups: [], exercises: [defaultExercise()] },
+    { id: "training-b", name: "Treino B", splitLabel: "", focusGroups: [], exercises: [] },
+    { id: "training-c", name: "Treino C", splitLabel: "", focusGroups: [], exercises: [] },
+    { id: "training-d", name: "Treino D", splitLabel: "", focusGroups: [], exercises: [] },
   ],
 });
 
@@ -293,6 +409,8 @@ function bindEvents() {
   elements.tableBody.addEventListener("dragend", handleTableDragEnd);
   elements.trainingTabs.addEventListener("click", handleTabClick);
   elements.exerciseDrawerSearch?.addEventListener("input", handleExerciseDrawerSearch);
+  elements.exerciseDrawerList?.addEventListener("mouseover", handleExerciseDrawerPreview);
+  elements.exerciseDrawerList?.addEventListener("focusin", handleExerciseDrawerPreview);
   document.addEventListener("click", handleDocumentClick);
   document.addEventListener("keydown", handleDocumentKeyDown);
 }
@@ -326,8 +444,6 @@ function loadState() {
         name: training.name || `Treino ${trainingIndex + 1}`,
         splitLabel: training.splitLabel || "",
         focusGroups: Array.isArray(training.focusGroups) ? training.focusGroups : [],
-        bodyMapCategory: training.bodyMapCategory || "",
-        bodyMapView: training.bodyMapView === "back" ? "back" : "front",
         exercises: Array.isArray(training.exercises)
           ? training.exercises.map((exercise) => ({
               ...defaultExercise(),
@@ -372,8 +488,6 @@ function render() {
 
 function renderPlanningBoard() {
   const activeTraining = getActiveTraining();
-  const activeGroups = new Set(activeTraining.focusGroups || []);
-  const selectedCategory = activeTraining.bodyMapCategory || activeTraining.focusGroups[0] || "";
 
   elements.activeSplitLabel.textContent = activeTraining.splitLabel
     ? `${activeTraining.splitLabel} • ${activeTraining.focusGroups.join(", ")}`
@@ -382,44 +496,6 @@ function renderPlanningBoard() {
   elements.splitPresets.querySelectorAll("[data-action='apply-split']").forEach((button) => {
     button.classList.toggle("is-active", button.dataset.split === activeTraining.splitLabel);
   });
-
-  document.querySelectorAll(".body-hotspot").forEach((button) => {
-    const category = button.dataset.category || "";
-    button.classList.toggle("is-active", category === selectedCategory || activeGroups.has(category));
-  });
-
-  if (elements.bodyMapSelectedLabel) {
-    elements.bodyMapSelectedLabel.textContent = selectedCategory || "Nenhum grupo selecionado";
-  }
-
-  if (elements.bodyMapSelectedCopy) {
-    elements.bodyMapSelectedCopy.textContent = selectedCategory
-      ? `${selectedCategory} esta destacado no mapa. Clique novamente em outra regiao para trocar rapidamente o foco do treino.`
-      : "Escolha uma regiao do corpo para o sistema aplicar esse agrupamento na proxima linha livre.";
-  }
-
-  setBodyMapView(activeTraining.bodyMapView || "front", false);
-}
-
-function setBodyMapView(view, shouldPersist = true) {
-  const activeTraining = getActiveTraining();
-  activeTraining.bodyMapView = view === "back" ? "back" : "front";
-
-  document.querySelectorAll('[data-action="toggle-map-view"]').forEach((button) => {
-    const isActive = button.dataset.view === activeTraining.bodyMapView;
-    button.classList.toggle("is-active", isActive);
-    button.setAttribute("aria-pressed", String(isActive));
-  });
-
-  document.querySelectorAll('[data-view-panel]').forEach((panel) => {
-    const isActive = panel.dataset.viewPanel === activeTraining.bodyMapView;
-    panel.hidden = !isActive;
-    panel.classList.toggle("is-active", isActive);
-  });
-
-  if (shouldPersist) {
-    persistAndRender(false);
-  }
 }
 
 function renderTabs() {
@@ -525,8 +601,6 @@ function handleAddTraining() {
     name: nextLabel,
     splitLabel: "",
     focusGroups: [],
-    bodyMapCategory: "",
-    bodyMapView: "front",
     exercises: [],
   };
 
@@ -880,7 +954,7 @@ function handleTableDragEnd() {
 function handleDocumentClick(event) {
   const target = event.target;
 
-  if (target instanceof HTMLElement) {
+  if (target instanceof Element) {
     const closeCategoryDrawerButton = target.closest('[data-action="close-category-drawer"]');
     if (closeCategoryDrawerButton) {
       closeCategoryDrawer();
@@ -899,26 +973,21 @@ function handleDocumentClick(event) {
       return;
     }
 
+    const categoryOption = target.closest('[data-action="choose-category-drawer"]');
+    if (categoryOption) {
+      selectCategoryFromDrawer(categoryOption);
+      return;
+    }
+
     const splitButton = target.closest('[data-action="apply-split"]');
     if (splitButton) {
       applySplitPreset(splitButton.dataset.split || "", (splitButton.dataset.groups || "").split(",").filter(Boolean));
       return;
     }
 
-    const viewButton = target.closest('[data-action="toggle-map-view"]');
-    if (viewButton) {
-      setBodyMapView(viewButton.dataset.view || "front");
-      return;
-    }
-
-    const bodyZoneButton = target.closest('[data-action="quick-category"]');
-    if (bodyZoneButton) {
-      assignCategoryFromBodyMap(bodyZoneButton.dataset.category || "");
-      return;
-    }
   }
 
-  if (target instanceof HTMLElement && (target.closest(".exercise-picker") || target.closest(".category-picker") || target.closest(".exercise-drawer__panel") || target.closest(".category-drawer__panel"))) {
+  if (target instanceof Element && (target.closest(".exercise-picker") || target.closest(".category-picker") || target.closest(".exercise-drawer__panel") || target.closest(".category-drawer__panel"))) {
     return;
   }
 }
@@ -1009,21 +1078,93 @@ function setExerciseCategory(row, exercise, category, openSuggestions = true) {
 }
 
 function findExerciseMatches(category, query) {
-  const source = category && EXERCISE_LIBRARY[category] ? EXERCISE_LIBRARY[category] : ALL_EXERCISES;
+  const source = category
+    ? ALL_EXERCISE_DETAILS.filter((exercise) => exercise.category === category)
+    : ALL_EXERCISE_DETAILS;
   const normalizedQuery = normalizeLookupValue(query);
+  const profile = state.profile;
 
   if (!normalizedQuery) {
-    return source;
+    return source
+      .slice()
+      .sort((left, right) => compareRecommendedExercises(left, right, profile));
   }
 
-  const startsWithMatches = source.filter((exercise) => normalizeLookupValue(exercise).startsWith(normalizedQuery));
-  const containsMatches = source.filter(
-    (exercise) =>
-      !normalizeLookupValue(exercise).startsWith(normalizedQuery)
-      && normalizeLookupValue(exercise).includes(normalizedQuery),
-  );
+  return source
+    .map((exercise) => ({
+      exercise,
+      score: scoreExerciseMatch(exercise, normalizedQuery),
+      recommendation: getExerciseRecommendationScore(exercise, profile),
+    }))
+    .filter(({ score }) => score < Number.POSITIVE_INFINITY)
+    .sort((left, right) => left.score - right.score || left.recommendation - right.recommendation || left.exercise.name.localeCompare(right.exercise.name))
+    .map(({ exercise }) => exercise);
+}
 
-  return [...startsWithMatches, ...containsMatches];
+function compareRecommendedExercises(left, right, profile) {
+  return getExerciseRecommendationScore(left, profile) - getExerciseRecommendationScore(right, profile)
+    || left.name.localeCompare(right.name);
+}
+
+function getExerciseRecommendationScore(exercise, profile) {
+  let score = 0;
+  const levelOrder = { Iniciante: 0, Intermediario: 1, Avancado: 2 };
+  const targetLevel = levelOrder[profile.level || ""];
+  const exerciseLevel = levelOrder[exercise.level || ""];
+
+  if (Number.isInteger(targetLevel) && Number.isInteger(exerciseLevel)) {
+    score += Math.abs(targetLevel - exerciseLevel) * 2;
+  }
+
+  const goalAffinity = {
+    Hipertrofia: ["Hipertrofia"],
+    Emagrecimento: ["Emagrecimento", "Resistencia", "Condicionamento"],
+    Resistencia: ["Resistencia", "Condicionamento"],
+    Forca: ["Forca"],
+    Reabilitacao: ["Reabilitacao", "Controle motor"],
+  };
+  const affinity = goalAffinity[profile.goal || ""] || [];
+
+  if (affinity.length) {
+    const hasAffinity = exercise.goals.some((item) => affinity.includes(item)) || affinity.includes(exercise.type);
+    score += hasAffinity ? -3 : 2;
+  }
+
+  return score;
+}
+
+function scoreExerciseMatch(exercise, normalizedQuery) {
+  const normalizedName = normalizeLookupValue(exercise.name);
+
+  if (normalizedName.startsWith(normalizedQuery)) {
+    return 0;
+  }
+
+  if (normalizedName.includes(normalizedQuery)) {
+    return 1;
+  }
+
+  const aliasMatch = exercise.aliases.some((alias) => normalizeLookupValue(alias).includes(normalizedQuery));
+  if (aliasMatch) {
+    return 2;
+  }
+
+  const metadataFields = [
+    exercise.level,
+    exercise.type,
+    exercise.equipment,
+    exercise.description,
+    exercise.postureTips,
+    ...exercise.secondary,
+    ...exercise.variations,
+    ...exercise.goals,
+  ];
+
+  if (metadataFields.some((field) => normalizeLookupValue(field).includes(normalizedQuery))) {
+    return 3;
+  }
+
+  return Number.POSITIVE_INFINITY;
 }
 
 function openExerciseDrawer(row, exercise) {
@@ -1032,7 +1173,8 @@ function openExerciseDrawer(row, exercise) {
   }
 
   exerciseDrawerState.exerciseId = exercise.id;
-  exerciseDrawerState.query = exercise.name || "";
+  exerciseDrawerState.query = "";
+  exerciseDrawerState.previewName = exercise.name || "";
   elements.exerciseDrawer.hidden = false;
   elements.exerciseDrawer.setAttribute("aria-hidden", "false");
   document.body.classList.add("drawer-open");
@@ -1067,6 +1209,7 @@ function closeExerciseDrawer() {
   document.body.classList.remove("drawer-open");
   exerciseDrawerState.exerciseId = null;
   exerciseDrawerState.query = "";
+  exerciseDrawerState.previewName = "";
 
   const row = currentExerciseId
     ? elements.tableBody.querySelector(`tr[data-exercise-id="${currentExerciseId}"]`)
@@ -1097,6 +1240,16 @@ function handleExerciseDrawerSearch(event) {
   renderExerciseDrawer();
 }
 
+function handleExerciseDrawerPreview(event) {
+  const option = event.target instanceof Element ? event.target.closest('[data-action="choose-exercise-drawer"]') : null;
+
+  if (!(option instanceof HTMLButtonElement)) {
+    return;
+  }
+
+  exerciseDrawerState.previewName = option.dataset.exercise || "";
+}
+
 function renderExerciseDrawer() {
   if (!elements.exerciseDrawer || elements.exerciseDrawer.hidden) {
     return;
@@ -1113,6 +1266,7 @@ function renderExerciseDrawer() {
   const matches = findExerciseMatches(exercise.category, exerciseDrawerState.query);
   const visibleMatches = matches.slice(0, 40);
   const normalizedSelectedName = normalizeLookupValue(exercise.name);
+  const selectedDetails = getExerciseDetails(exercise.name);
 
   if (elements.exerciseDrawerTraining) {
     elements.exerciseDrawerTraining.textContent = getDisplayTrainingName(activeTraining.name);
@@ -1122,10 +1276,14 @@ function renderExerciseDrawer() {
     elements.exerciseDrawerCategory.textContent = categoryLabel;
   }
 
+  if (elements.exerciseDrawerCategoryBadge) {
+    elements.exerciseDrawerCategoryBadge.textContent = categoryLabel;
+  }
+
   if (elements.exerciseDrawerDescription) {
     elements.exerciseDrawerDescription.textContent = exercise.category
-      ? `Exibindo exercicios de ${exercise.category}. Ajuste a categoria da linha para trocar o agrupamento.`
-      : "Sem categoria definida. Escolha qualquer exercicio e a categoria sera ajustada automaticamente.";
+      ? `Exibindo exercicios de ${exercise.category}. Busque tambem por nivel, equipamento, objetivo ou variacao.`
+      : "Sem categoria definida. Busque por nome, equipamento, nivel ou escolha qualquer exercicio para preencher a linha.";
   }
 
   if (elements.exerciseDrawerSearch && elements.exerciseDrawerSearch.value !== exerciseDrawerState.query) {
@@ -1134,6 +1292,12 @@ function renderExerciseDrawer() {
 
   if (elements.exerciseDrawerMeta) {
     elements.exerciseDrawerMeta.textContent = `${categoryLabel} • ${matches.length} opcao(oes)`;
+  }
+
+  if (elements.exerciseDrawerMetaCopy) {
+    const goal = state.profile.goal || "Livre";
+    const level = state.profile.level || "Nao definido";
+    elements.exerciseDrawerMetaCopy.textContent = `Ordenado por objetivo ${goal} e nivel ${level}.`;
   }
 
   if (!elements.exerciseDrawerList) {
@@ -1146,12 +1310,36 @@ function renderExerciseDrawer() {
   }
 
   elements.exerciseDrawerList.innerHTML = visibleMatches
-    .map((exerciseName) => {
-      const inferredCategory = inferCategoryFromExerciseName(exerciseName);
-      const isSelected = normalizeLookupValue(exerciseName) === normalizedSelectedName;
-      return `<button class="exercise-option${isSelected ? " is-selected" : ""}" type="button" data-action="choose-exercise-drawer" data-exercise="${escapeAttribute(exerciseName)}" data-category="${escapeAttribute(inferredCategory)}"><span>${exerciseName}</span><small>${inferredCategory || categoryLabel}</small></button>`;
+    .map((exerciseEntry, index) => {
+      const inferredCategory = exerciseEntry.category || inferCategoryFromExerciseName(exerciseEntry.name);
+      const isSelected = normalizeLookupValue(exerciseEntry.name) === normalizedSelectedName
+        || Boolean(selectedDetails && selectedDetails.name === exerciseEntry.name);
+      return `<button class="exercise-option${isSelected ? " is-selected" : ""}" type="button" data-action="choose-exercise-drawer" data-exercise="${escapeAttribute(exerciseEntry.name)}" data-category="${escapeAttribute(inferredCategory)}"><span class="exercise-option__index">${String(index + 1).padStart(2, "0")}</span><span class="exercise-option__content"><strong>${exerciseEntry.name}</strong></span></button>`;
     })
     .join("");
+}
+
+function getRecommendationBadge(exercise, profile) {
+  if (!exercise) {
+    return "";
+  }
+
+  const matchesGoal = Boolean(profile.goal) && getExerciseRecommendationScore(exercise, profile) <= -1;
+  const matchesLevel = Boolean(profile.level) && exercise.level === profile.level;
+
+  if (matchesGoal && matchesLevel) {
+    return "Perfil ideal";
+  }
+
+  if (matchesGoal) {
+    return "Sugestao do objetivo";
+  }
+
+  if (matchesLevel) {
+    return "Nivel alinhado";
+  }
+
+  return "";
 }
 
 function renderCategoryDrawer() {
@@ -1188,7 +1376,8 @@ function renderCategoryDrawer() {
     .map((category) => {
       const isActive = category === exercise.category;
       const exerciseCount = EXERCISE_LIBRARY[category]?.length || 0;
-      return `<button class="category-option category-option--drawer${isActive ? " is-active" : ""}" type="button" data-action="choose-category-drawer" data-category="${category}"><span>${category}</span><small>${exerciseCount} exercicio${exerciseCount === 1 ? "" : "s"}</small></button>`;
+      const shortCode = category.slice(0, 2).toUpperCase();
+      return `<button class="category-option category-option--drawer${isActive ? " is-active" : ""}" type="button" data-action="choose-category-drawer" data-category="${category}"><span class="category-option__mark">${shortCode}</span><span class="category-option__body"><strong>${category}</strong></span><span class="category-option__meta">${exerciseCount} exercicio${exerciseCount === 1 ? "" : "s"}</span></button>`;
     })
     .join("");
 }
@@ -1261,56 +1450,26 @@ function applySplitPreset(splitLabel, groups) {
   const activeTraining = getActiveTraining();
   const preset = SPLIT_PRESET_LIBRARY[splitLabel];
   const presetGroups = preset?.groups || groups;
-  const insertedCount = preset ? seedExercisesFromPreset(activeTraining, preset.exercises) : 0;
+  const insertedCount = preset ? replaceExercisesFromPreset(activeTraining, preset.exercises) : 0;
 
   activeTraining.splitLabel = splitLabel;
   activeTraining.focusGroups = presetGroups;
-  activeTraining.bodyMapCategory = presetGroups[0] || "";
   persistAndRender();
-  setStatusMessage(`Preset ${splitLabel} aplicado com ${insertedCount} exercicio(s) base.`, "success");
+  setStatusMessage(`Preset ${splitLabel} aplicado e treino atualizado com ${insertedCount} exercicio(s).`, "success");
 }
 
-function assignCategoryFromBodyMap(category) {
-  const activeTraining = getActiveTraining();
-  let exercise = activeTraining.exercises.find((item) => !isExerciseMeaningful(item));
+function replaceExercisesFromPreset(training, presetExercises) {
+  training.exercises = presetExercises.map((exercise) => ({
+    id: crypto.randomUUID(),
+    category: exercise.category,
+    name: exercise.name,
+    sets: exercise.sets,
+    reps: exercise.reps,
+    load: exercise.load,
+    notes: "",
+  }));
 
-  if (!exercise) {
-    exercise = defaultExercise();
-    activeTraining.exercises.push(exercise);
-  }
-
-  exercise.category = category;
-  activeTraining.bodyMapCategory = category;
-
-  if (!activeTraining.focusGroups.includes(category)) {
-    activeTraining.focusGroups = [...activeTraining.focusGroups, category];
-  }
-
-  persistAndRender();
-  setStatusMessage(`${category} aplicado na proxima linha disponivel e destacado no mapa corporal.`, "success");
-}
-
-function seedExercisesFromPreset(training, presetExercises) {
-  const meaningfulExercises = training.exercises.filter(isExerciseMeaningful);
-  const existingNames = new Set(meaningfulExercises.map((exercise) => normalizeLookupValue(exercise.name)));
-  const exercisesToInsert = presetExercises.filter(
-    (exercise) => !existingNames.has(normalizeLookupValue(exercise.name)),
-  );
-
-  training.exercises = meaningfulExercises;
-  exercisesToInsert.forEach((exercise) => {
-    training.exercises.push({
-      id: crypto.randomUUID(),
-      category: exercise.category,
-      name: exercise.name,
-      sets: exercise.sets,
-      reps: exercise.reps,
-      load: exercise.load,
-      notes: "",
-    });
-  });
-
-  return exercisesToInsert.length;
+  return training.exercises.length;
 }
 
 function duplicateExercise(exerciseId) {
@@ -2385,8 +2544,6 @@ function normalizeTraining(training, index) {
     name: String(rawName).slice(0, 30),
     splitLabel: String(training?.splitLabel ?? ""),
     focusGroups: Array.isArray(training?.focusGroups) ? training.focusGroups.filter(Boolean) : [],
-    bodyMapCategory: String(training?.bodyMapCategory ?? ""),
-    bodyMapView: training?.bodyMapView === "back" ? "back" : "front",
     exercises: Array.isArray(rawExercises)
       ? rawExercises.map((exercise) => normalizeExercise(exercise)).filter(Boolean)
       : [],
@@ -2412,7 +2569,27 @@ function normalizeExercise(exercise) {
 }
 
 function inferCategoryFromExerciseName(name) {
-  return EXERCISE_CATEGORY_BY_NAME.get(normalizeLookupValue(name)) || "";
+  const normalizedName = normalizeLookupValue(name);
+
+  if (!normalizedName) {
+    return "";
+  }
+
+  return EXERCISE_CATEGORY_BY_NAME.get(normalizedName)
+    || ALL_EXERCISE_DETAILS.find((exercise) => normalizeLookupValue(exercise.name).includes(normalizedName))?.category
+    || "";
+}
+
+function getExerciseDetails(name) {
+  const normalizedName = normalizeLookupValue(name);
+
+  if (!normalizedName) {
+    return null;
+  }
+
+  return EXERCISE_DETAILS_BY_NAME.get(normalizedName)
+    || ALL_EXERCISE_DETAILS.find((exercise) => normalizeLookupValue(exercise.name).includes(normalizedName))
+    || null;
 }
 
 function normalizeLookupValue(value) {
